@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How AI Works</title>
+<meta name="description" content="An interactive guide for complete beginners: how AI and LLMs work, training data, RAG, APIs and MCP, private AI for companies, energy use, safety and AI laws.">
+<meta property="og:title" content="How AI Works">
+<meta property="og:description" content="An interactive guide for complete beginners, one diagram at a time.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#2c63f0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232c63f0'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 12.5l1.2 2.3 2.3 1.2-2.3 1.2-1.2 2.3-1.2-2.3-2.3-1.2 2.3-1.2z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Figtree:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a lab notebook for the machine room. Diagram on a dotted circuit-board panel, short text beside it, step bar fixed at the bottom. Diagrams are flat icons (people, companies, data centres, models) wired with circuit-trace connectors. */
+:root{
+  --paper:#eef2f6; --card:#ffffff; --ink:#13202e; --soft:#566576; --rule:#d5dde6;
+  --coral:#2c63f0; --teal:#0b97ae; --mustard:#f0a114; --violet:#d93c74; --stone:#93a3b5;
+  --good:#1f8a5b; --bad:#d23c3c; --onacc:#ffffff;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Figtree","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 1px 2px rgba(19,32,46,.06),0 6px 20px rgba(19,32,46,.07);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b1118; --card:#131c26; --ink:#e7eef6; --soft:#97a6b7; --rule:#273546;
+    --coral:#6b95ff; --teal:#2bc0d6; --mustard:#ffbe45; --violet:#ff6f9e; --stone:#56677a;
+    --good:#4cc38a; --bad:#ff7a7a; --onacc:#0b1118;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b1118; --card:#131c26; --ink:#e7eef6; --soft:#97a6b7; --rule:#273546;
+  --coral:#6b95ff; --teal:#2bc0d6; --mustard:#ffbe45; --violet:#ff6f9e; --stone:#56677a;
+  --good:#4cc38a; --bad:#ff7a7a; --onacc:#0b1118;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+a{color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.brand{white-space:nowrap;font-family:var(--display);font-weight:800;font-stretch:112%;font-size:20px;letter-spacing:-.01em;text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand i{width:10px;height:10px;border-radius:3px;background:var(--coral);box-shadow:14px 0 0 var(--teal),28px 0 0 var(--mustard);margin-right:30px}
+.brand span{color:var(--coral)}
+.crumb{font-family:var(--mono);font-size:12px;color:var(--soft);text-align:right}
+.btn{display:inline-block;text-decoration:none;border:1.5px solid var(--rule);background:var(--card);border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:var(--shadow);transition:transform .08s,border-color .15s}
+.btn:hover{border-color:var(--coral)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--coral);border-color:var(--coral);color:var(--onacc)}
+.btn[disabled]{opacity:.4;cursor:default;box-shadow:none}
+.btn.small{padding:6px 13px;font-size:14.5px}
+.ic{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ic .f{fill:var(--ink);stroke:none}
+
+/* home */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:28px;align-items:center;padding:34px 0 26px}
+.hero h1{font-family:var(--display);font-weight:800;font-stretch:118%;font-size:clamp(38px,7vw,66px);line-height:.98;letter-spacing:-.025em;margin:0 0 14px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--coral)}
+.hero p{max-width:46ch;margin:0 0 20px;color:var(--soft)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;padding:8px 0 50px}
+.chap{position:relative;display:flex;flex-direction:column;gap:6px;text-align:left;text-decoration:none;border:1px solid var(--rule);border-radius:16px;background:var(--card);padding:16px 16px 14px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.chap:hover{transform:translateY(-2px);border-color:var(--coral)}
+.chap .ci{position:absolute;top:14px;right:14px;width:30px;height:30px;color:var(--coral)}
+.chap .ci .ic{stroke:currentColor}.chap .ci .ic .f{fill:currentColor}
+.chap .num{font-family:var(--mono);font-size:12px;color:var(--soft)}
+.chap h3{font-family:var(--display);font-weight:800;font-stretch:108%;font-size:20px;line-height:1.15;margin:0;padding-right:36px;letter-spacing:-.01em}
+.chap p{margin:0;font-size:15px;color:var(--soft);flex:1}
+.bar{height:6px;border-radius:6px;background:var(--rule);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--coral))}
+h2.sec{font-family:var(--display);font-weight:800;font-stretch:112%;font-size:26px;margin:18px 0 6px}
+footer{border-top:1px solid var(--rule);padding:16px 0 40px;font-size:14px;color:var(--soft)}
+
+/* lesson */
+.lesson{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:26px;padding:22px 0 110px;align-items:start}
+.stage{border:1px solid var(--rule);border-radius:18px;background:radial-gradient(circle,color-mix(in srgb,var(--soft) 28%,transparent) 1px,transparent 1.5px) 0 0/18px 18px,var(--card);box-shadow:var(--shadow);padding:14px;min-height:260px;position:sticky;top:12px}
+.hero>*,.lesson>*{min-width:0}
+.dg{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.stage svg{display:block;width:100%;height:auto;max-height:360px}
+.copy h1{font-family:var(--display);font-weight:800;font-stretch:112%;font-size:clamp(28px,5vw,40px);line-height:1.05;letter-spacing:-.02em;margin:4px 0 12px;text-wrap:balance}
+.copy p{margin:0 0 12px;max-width:62ch}
+.copy .key{border-left:4px solid var(--teal);padding:2px 0 2px 12px;font-weight:700}
+.copy small{color:var(--soft);display:block;font-size:14px;line-height:1.45}
+.copy b.t{background:linear-gradient(transparent 60%,color-mix(in srgb,var(--teal) 28%,transparent) 60%)}
+.copy .w{background:var(--card)}
+.rail{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--rule);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}
+.rail .wrap{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center;flex:1}
+.dots a{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--soft);background:transparent;display:block;transition:width .2s}
+.dots a.seen{background:var(--teal);border-color:var(--teal)}
+.dots a.on{background:var(--coral);border-color:var(--coral);width:24px}
+
+/* diagram */
+.nd{transition:opacity .3s}
+.nd.off{opacity:.22}
+.nd .tile{fill:color-mix(in srgb,var(--c) 15%,var(--card));stroke:var(--c);stroke-width:1.6}
+.nd .ring{fill:none;stroke:var(--c);stroke-width:6;opacity:.22}
+.nd .led{fill:var(--c)}
+.lb{font-family:var(--mono);font-size:12px;font-weight:500;fill:var(--ink);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
+.lb.off{opacity:.35}
+.ed{fill:none;stroke:var(--soft);stroke-width:1.4;stroke-dasharray:2 5;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+.ed.live{stroke:var(--coral);stroke-dasharray:none;opacity:1;stroke-width:2.2}
+.ed.block{stroke:var(--bad);stroke-dasharray:4 4;opacity:1;stroke-width:2}
+.pk{fill:var(--card);stroke:var(--coral);stroke-width:2.5}
+.xmark{font-family:var(--display);font-weight:800;font-size:18px;fill:var(--bad);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:4px}
+
+/* widgets */
+.w{display:flex;flex-direction:column;gap:12px;background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.w h4{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--soft)}
+.w input[type=text],.w select{width:100%;border:1.5px solid var(--rule);border-radius:10px;background:var(--card);padding:10px;font-size:16px}
+.w input[type=text]:focus,.w select:focus{border-color:var(--coral);outline:none}
+.w input[type=range]{width:100%;accent-color:var(--coral)}
+.w label{font-size:14px;display:flex;flex-direction:column;gap:4px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-family:var(--mono);font-size:14px;padding:4px 8px;border-radius:7px;border:1px solid color-mix(in srgb,#13202e 25%,transparent);white-space:pre;color:#13202e}
+.pb{display:grid;grid-template-columns:78px 1fr 46px;gap:8px;align-items:center;font-family:var(--mono);font-size:13px}
+.pb .trk{height:14px;background:var(--card);border:1px solid var(--rule);border-radius:99px;overflow:hidden}
+.pb .trk i{display:block;height:100%;background:var(--teal);border-radius:99px;transition:width .25s}
+.pb.hit .trk i{background:var(--violet)}
+.pb span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.hint{margin:0;font-weight:700;font-size:14.5px;color:var(--coral)}
+.note{font-size:13.5px;color:var(--soft);margin:0}
+.out{font-family:var(--mono);font-size:14px;background:var(--card);border:1px dashed var(--soft);border-radius:10px;padding:10px;min-height:42px}
+.seg{display:flex;border:1.5px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--card)}
+.seg button{flex:1;border:0;background:transparent;padding:9px 6px;font-size:14px;font-weight:700;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.kv{display:grid;grid-template-columns:minmax(96px,34%) 1fr;gap:6px 12px;font-size:14.5px;margin:0}
+.kv dt{font-family:var(--mono);font-size:12px;color:var(--soft);padding-top:2px}
+.kv dd{margin:0}
+.map{position:relative;aspect-ratio:1/0.8;background:var(--card);border:1px solid var(--rule);border-radius:10px}
+.map button{position:absolute;transform:translate(-50%,-50%);border:1px solid var(--rule);border-radius:99px;background:var(--paper);font-family:var(--mono);font-size:12px;padding:3px 8px}
+.map button.sel{background:var(--coral);border-color:var(--coral);color:var(--onacc)}
+.map button.near{background:color-mix(in srgb,var(--mustard) 70%,#fff);color:#13202e}
+.ctx{display:flex;height:34px;border:1.5px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--card)}
+.ctx i{display:block;height:100%;border-right:1px solid var(--card)}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--rule);border-radius:12px;background:var(--card);padding:10px 12px}
+.opt:hover{border-color:var(--coral)}
+.opt.right{background:color-mix(in srgb,var(--good) 20%,var(--card));border-color:var(--good)}
+.opt.wrong{background:color-mix(in srgb,var(--bad) 16%,var(--card));border-color:var(--bad)}
+.doc{border:1px solid var(--rule);border-radius:10px;padding:8px 10px;font-size:14px;background:var(--card);display:grid;grid-template-columns:1fr auto;gap:8px;opacity:.55}
+.doc.top{opacity:1;background:color-mix(in srgb,var(--teal) 14%,var(--card));border-color:var(--teal)}
+.doc b{font-family:var(--mono);font-size:12px}
+.nest{border:1.5px solid color-mix(in srgb,var(--ink) 25%,transparent);border-radius:12px;padding:10px;font-family:var(--mono);font-size:12.5px}
+.nest>.nest{margin-top:8px}
+.big{font-family:var(--display);font-weight:800;font-stretch:110%;font-size:34px;line-height:1}
+.tl{display:flex;flex-direction:column;gap:8px}
+.li{display:grid;grid-template-columns:86px 1fr;gap:10px;border:1px solid var(--rule);border-radius:12px;padding:9px 11px;background:var(--card)}
+.li .ld{font-family:var(--mono);font-size:12px;color:var(--soft);padding-top:3px;font-variant-numeric:tabular-nums}
+.li p{margin:4px 0;font-size:14.5px}
+.li a{font-size:14px;font-weight:700;color:var(--coral)}
+.li .rg{font-family:var(--mono);font-size:11.5px;color:var(--soft)}
+.st{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 8px;border-radius:20px;margin-right:4px;color:#13202e}
+.st.in{background:color-mix(in srgb,var(--good) 40%,#fff)}
+.st.soon{background:color-mix(in srgb,var(--mustard) 65%,#fff)}
+.st.prop{background:color-mix(in srgb,var(--stone) 55%,#fff)}
+.today{font-family:var(--mono);font-size:12px;text-align:center;color:var(--coral);border-top:2px dashed var(--coral);padding-top:4px}
+.tier{display:block;margin:0 auto;border:1.5px solid color-mix(in srgb,#13202e 30%,transparent);border-radius:10px;padding:8px;font-weight:700;color:#13202e;text-align:center}
+.tier.sel{outline:3px solid var(--coral);outline-offset:2px}
+.cl{display:flex;gap:10px;align-items:flex-start;font-size:15px;padding:6px 0;border-bottom:1px solid var(--rule);flex-direction:row}
+.cl input{width:20px;height:20px;margin-top:2px;accent-color:var(--teal);flex:none}
+@media (max-width:820px){
+  .hero{grid-template-columns:minmax(0,1fr);padding-top:22px}
+  .lesson{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:14px}
+  .stage{position:static;min-height:0;padding:10px}
+  .stage svg{max-height:300px}
+  .dg svg{min-width:470px}
+  body{font-size:16.5px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" id="home-link"><i aria-hidden="true"></i>How <span>AI</span> Works</a>
+    <div class="crumb" id="crumb">One diagram at a time</div>
+  </header>
+  <main id="app"></main>
+</div>
+<script>
+"use strict";
+/* ---------- diagrams ---------- */
+const COL={a:'var(--teal)',b:'var(--coral)',c:'var(--mustard)',d:'var(--violet)',n:'var(--stone)'};
+const ICONS={
+ llm:'<rect x="6" y="6" width="12" height="12" rx="2.5"/><path d="M9 2.5v3.5M15 2.5v3.5M9 18v3.5M15 18v3.5M2.5 9h3.5M2.5 15h3.5M18 9h3.5M18 15h3.5"/><path class="f" d="M12 8.6l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z"/>',
+ dc:'<rect x="5" y="2.5" width="14" height="19" rx="1.8"/><path d="M5 8.8h14M5 15.2h14M11 5.6h5M11 12h5M11 18.4h5"/><circle class="f" cx="8" cy="5.6" r="1"/><circle class="f" cx="8" cy="12" r="1"/><circle class="f" cx="8" cy="18.4" r="1"/>',
+ co:'<path d="M4 21V5l8-2.5V21M12 8h8v13M2 21h20M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2"/>',
+ person:'<circle cx="12" cy="7.5" r="4"/><path d="M4 21c0-4.4 3.6-7.2 8-7.2s8 2.8 8 7.2"/>',
+ people:'<circle cx="9" cy="8" r="3.3"/><path d="M2.5 20.5c0-3.7 2.9-6 6.5-6s6.5 2.3 6.5 6"/><circle cx="17" cy="8.6" r="2.7"/><path d="M16.2 14.2c3.1.2 5.4 2.2 5.4 5.4"/>',
+ doc:'<path d="M6 2.5h8l5 5v14H6z"/><path d="M14 2.5v5h5M9 12h7M9 16h7"/>',
+ db:'<ellipse cx="12" cy="5.5" rx="7" ry="2.7"/><path d="M5 5.5v13c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7v-13M5 12c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
+ book:'<path d="M3.5 4.5h6a2.5 2.5 0 0 1 2.5 2.5v13a2 2 0 0 0-2-2H3.5zM20.5 4.5h-6A2.5 2.5 0 0 0 12 7v13a2 2 0 0 1 2-2h6.5z"/>',
+ code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+ filter:'<path d="M3 4h18l-7 8.2V19l-4 2v-8.8z"/>',
+ chart:'<path d="M3.5 20.5h17"/><rect x="5" y="11" width="3.4" height="9.5" rx=".6"/><rect x="10.3" y="4.5" width="3.4" height="16" rx=".6"/><rect x="15.6" y="14" width="3.4" height="6.5" rx=".6"/>',
+ dice:'<rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle class="f" cx="8.5" cy="8.5" r="1.4"/><circle class="f" cx="12" cy="12" r="1.4"/><circle class="f" cx="15.5" cy="15.5" r="1.4"/>',
+ text:'<path d="M3.5 4.5h17v11.5H9.5l-6 4.5z"/><path d="M7.5 8.5h9M7.5 12h6"/>',
+ tokens:'<rect x="1.8" y="8" width="6" height="8" rx="1.6"/><rect x="9" y="8" width="6" height="8" rx="1.6"/><rect x="16.2" y="8" width="6" height="8" rx="1.6"/>',
+ hash:'<path d="M9.5 3L7.5 21M16.5 3l-2 18M4 8.8h17M3 15.2h17"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="M7.8 12.4l2.8 2.8L16.4 9"/>',
+ target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle class="f" cx="12" cy="12" r="1.6"/>',
+ sliders:'<path d="M4 6h16M4 12h16M4 18h16"/><circle class="f" cx="9" cy="6" r="2.2"/><circle class="f" cx="15" cy="12" r="2.2"/><circle class="f" cx="7" cy="18" r="2.2"/>',
+ window:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8.5h18M7 12.5h10M7 16h6"/>',
+ gear:'<circle cx="12" cy="12" r="3.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+ search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4L21 21"/>',
+ terminal:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 9.5l3 2.5-3 2.5M12.5 15h4.5"/>',
+ plug:'<path d="M9 2.5v4.5M15 2.5v4.5M6 7h12v3.8a6 6 0 0 1-12 0zM12 16.8v4.7"/>',
+ phone:'<rect x="6" y="2.5" width="12" height="19" rx="2.6"/><path d="M10.5 18.3h3"/>',
+ key:'<circle cx="8" cy="15.5" r="4.5"/><path d="M11.3 12.2L20 3.5M16.2 7.3l2.8 2.8M14 9.5l2 2"/>',
+ meter:'<path d="M3.5 17.5a8.5 8.5 0 1 1 17 0"/><path d="M12 17.5l4.2-6"/><circle class="f" cx="12" cy="17.5" r="1.5"/>',
+ coin:'<circle cx="12" cy="12" r="9"/><path d="M14.6 9.2c-.5-1-1.5-1.6-2.6-1.6-1.5 0-2.7.8-2.7 2.1 0 2.9 5.4 1.6 5.4 4.6 0 1.3-1.2 2.3-2.7 2.3-1.1 0-2.1-.6-2.6-1.6M12 5.8v1.8M12 16.4v1.8"/>',
+ bolt:'<path d="M13.5 2L4.5 13.8h7l-1 8.2 9-11.8h-7z"/>',
+ drop:'<path d="M12 3c3.6 4.6 6 7.9 6 11.1a6 6 0 0 1-12 0C6 10.9 8.4 7.6 12 3z"/><path d="M9.3 14.5a2.8 2.8 0 0 0 2.4 2.6"/>',
+ shield:'<path d="M12 2.5l8 3v6c0 5-3.4 9.2-8 10.9-4.6-1.7-8-5.9-8-10.9v-6z"/><path d="M8.6 12l2.4 2.4 4.4-4.8"/>',
+ lock:'<rect x="5" y="10.5" width="14" height="10.5" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+ unlock:'<rect x="5" y="10.5" width="14" height="10.5" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.8"/>',
+ list:'<path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><circle class="f" cx="4.5" cy="6" r="1.3"/><circle class="f" cx="4.5" cy="12" r="1.3"/><circle class="f" cx="4.5" cy="18" r="1.3"/>',
+ gov:'<path d="M2.5 8.8L12 3.5l9.5 5.3M5 9.5v8.5M9.7 9.5v8.5M14.3 9.5v8.5M19 9.5v8.5M3 18.5h18M2.5 21h19"/>',
+ alert:'<path d="M12 3.2l9.6 17H2.4z"/><path d="M12 9.8v4.8"/><circle class="f" cx="12" cy="17.3" r="1.1"/>',
+ flask:'<path d="M9 2.5h6M10 2.5v6L4.3 18.7A2 2 0 0 0 6 21.5h12a2 2 0 0 0 1.7-2.8L14 8.5v-6M7 15h10"/>',
+ rocket:'<path d="M12 2.5c4 2.6 6 6.6 6 11l-3 3H9l-3-3c0-4.4 2-8.4 6-11z"/><circle cx="12" cy="10" r="2.1"/><path d="M9.2 16.5L7.5 21l3-1.8M14.8 16.5l1.7 4.5-3-1.8"/>',
+ scale:'<path d="M12 3v18M7.5 21h9M5 7h14M5 7l-3 6.5h6zM19 7l-3 6.5h6z"/>',
+ calendar:'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/><circle class="f" cx="8" cy="14.5" r="1.2"/>',
+ archive:'<rect x="3" y="4" width="18" height="5" rx="1.2"/><path d="M5 9v11h14V9M10 13h4"/>',
+ trend:'<path d="M3 17.5l6-6 4 4 8-8M15 7.5h6v6"/>'
+};
+// node: [gx, gy, label, colour, size, icon]
+const DG={
+ ai:{n:{dev:[0,3,'Programmer','c',22,'person'],rules:[2,3,'Hand-written|rules','n',22,'doc'],data:[0,0,'Examples','c',22,'db'],learn:[2,0,'Learning','a',22,'gear'],model:[4,1.5,'Model','d',30,'llm'],out:[6,1.5,'Answer','b',22,'text']},
+     e:[['dev','rules'],['rules','out'],['data','learn'],['learn','model'],['model','out']]},
+ neurons:{straight:1,n:{i1:[0,0,'','c',14,'dot'],i2:[0,2,'','c',14,'dot'],i3:[0,4,'Inputs','c',14,'dot'],h1:[3,0,'','a',14,'dot'],h2:[3,2,'','a',14,'dot'],h3:[3,4,'Hidden|layer','a',14,'dot'],o1:[6,1,'','b',14,'dot'],o2:[6,3,'Output','b',14,'dot']},
+     e:[['i1','h1'],['i1','h2'],['i1','h3'],['i2','h1'],['i2','h2'],['i2','h3'],['i3','h1'],['i3','h2'],['i3','h3'],['h1','o1'],['h2','o1'],['h3','o1'],['h1','o2'],['h2','o2'],['h3','o2']]},
+ tokens:{n:{text:[0,1,'Your text','c',22,'text'],tok:[2,1,'Tokenizer','a',22,'tokens'],ids:[4,1,'Token|numbers','n',22,'hash'],model:[6,1,'Model','d',30,'llm']},
+     e:[['text','tok'],['tok','ids'],['ids','model']]},
+ predict:{n:{prompt:[0,1,'Text so far','c',22,'text'],model:[2,1,'Model','d',30,'llm'],probs:[4,1,'Probabilities','a',22,'chart'],pick:[4,3,'Pick one|word','b',22,'dice']},
+     e:[['prompt','model'],['model','probs'],['probs','pick'],['pick','prompt']]},
+ training:{n:{web:[0,0,'Web pages','c',22,'globe'],books:[0,2,'Books &|licensed data','c',22,'book'],code:[0,4,'Code','c',22,'code'],clean:[2,2,'Filter &|clean','n',22,'filter'],dc:[4,0,'Data centre|(GPUs)','n',22,'dc'],model:[4,2,'Model in|training','d',30,'llm'],loss:[6,2,'Check the|guess','b',22,'target'],raters:[2,4,'People rating|answers','c',22,'people'],ft:[4,4,'Fine-tuning','a',22,'sliders'],done:[6,4,'Finished|model','d',30,'llm']},
+     e:[['web','clean'],['books','clean'],['code','clean'],['clean','model'],['dc','model'],['model','loss'],['model','ft'],['raters','ft'],['ft','done']]},
+ context:{n:{sys:[0,0,'Instructions','n',22,'gear'],hist:[0,2,'Chat so far','c',22,'text'],msg:[0,4,'Your new|message','b',22,'person'],win:[3,2,'Context|window','a',26,'window'],model:[5,2,'Model','d',30,'llm'],out:[7,2,'Reply','b',22,'text']},
+     e:[['sys','win'],['hist','win'],['msg','win'],['win','model'],['model','out']]},
+ rag:{n:{docs:[0,0,'Your|documents','c',22,'doc'],store:[3,0,'Search|index','a',22,'db'],q:[0,3,'Question','b',22,'person'],find:[3,3,'Find best|chunks','n',22,'search'],model:[5,3,'Model','d',30,'llm'],ans:[7,3,'Answer +|sources','b',22,'text']},
+     e:[['docs','store'],['q','find'],['store','find'],['find','model'],['model','ans']]},
+ agents:{n:{user:[0,2,'You','c',22,'person'],model:[2,2,'Model','d',30,'llm'],search:[5,0,'Web search','a',22,'globe'],code:[5,2,'Run code','a',22,'terminal'],apps:[5,4,'Your apps','a',22,'plug']},
+     e:[['user','model'],['model','search'],['model','code'],['model','apps']]},
+ llms:{n:{small:[0,1,'Small','a',12,'llm'],mid:[2,1,'Mid-size','c',26,'llm'],big:[4,1,'Large','d',46,'llm'],open:[1,4,'Open weights','n',22,'unlock'],closed:[3,4,'Closed, rented|by API','b',22,'lock']},e:[]},
+ ent:{n:{emp:[0,2,'Employee','c',22,'person'],admin:[2,0,'IT admin','c',22,'person'],sso:[2,2,'Company|login','n',22,'key'],ws:[4,2,'Company|workspace','a',22,'co'],data:[4,0,'Company files|& apps','c',22,'db'],claude:[6,2,'Claude','d',30,'llm'],logs:[4,4,'Audit log','n',22,'list'],train:[8,2,'Model|training','b',22,'sliders']},
+     e:[['emp','sso'],['admin','ws'],['sso','ws'],['ws','data'],['ws','claude'],['ws','logs'],['claude','train','x']]},
+ energy:{n:{grid:[0,2,'Power grid','c',22,'bolt'],dc:[2,2,'Data centre','n',30,'dc'],cool:[2,0,'Cooling &|water','a',22,'drop'],train:[4,1,'Training','d',22,'llm'],serve:[4,3,'Answering|prompts','b',22,'text'],you:[6,3,'You','c',22,'person']},
+     e:[['grid','dc'],['dc','cool'],['dc','train'],['dc','serve'],['serve','you']]},
+ api:{n:{app:[0,2,'Your app','c',22,'phone'],api:[2,2,'API','n',22,'key'],model:[4,2,'Model','d',30,'llm'],meter:[2,4,'Token|meter','b',22,'meter'],mcp:[4,0,'MCP|server','a',22,'plug'],tool:[6,0,'Your tools|& data','c',22,'db']},
+     e:[['app','api'],['api','model'],['api','meter'],['model','mcp'],['mcp','tool']]},
+ prices:{n:{chips:[0,0,'Better chips','a',22,'dc'],small:[0,2,'Smaller|models','d',22,'llm'],soft:[0,4,'Smarter|software','c',22,'code'],price:[3,2,'Price per|token','b',22,'coin'],use:[5,2,'More usage','n',30,'trend']},
+     e:[['chips','price'],['small','price'],['soft','price'],['price','use']]},
+ versions:{n:{d1:[0,0,'Data up to|cut-off 1','c',22,'calendar'],v1:[2,0,'Version 1|frozen','d',30,'llm'],you:[4,0,'Your chats','b',22,'person'],store:[4,2,'Saved only|if allowed','n',22,'archive'],d2:[2,3,'Data up to|cut-off 2','c',22,'calendar'],v2:[4,4,'Version 2|new run','d',30,'llm']},
+     e:[['d1','v1'],['v1','you'],['you','store'],['store','d2'],['d2','v2']]},
+ risks:{n:{tech:[0,2,'AI system','d',30,'llm'],people:[2,0,'People|using it','c',22,'people'],soc:[2,4,'Society','b',22,'globe'],guard:[4,2,'Safeguards','a',22,'shield']},
+     e:[['tech','people'],['tech','soc'],['people','guard'],['soc','guard']]},
+ modern:{n:{dc:[0,2,'Huge data|centres','n',22,'dc'],pre:[0,0,'Pre-training','c',22,'book'],mid:[2,0,'Mid-training','c',22,'code'],sft:[4,0,'Example|answers','a',22,'text'],raters:[2,4,'People &|AI judges','c',22,'people'],val:[2,2,'Values &|constitution','a',22,'scale'],rl:[4,2,'Practice|tasks (RL)','d',30,'llm'],check:[6,2,'Automatic|checker','b',22,'check'],eval:[4,4,'Safety|testing','n',22,'flask'],rel:[6,4,'Release +|small copies','d',24,'rocket']},
+     e:[['dc','pre'],['pre','mid'],['mid','sft'],['sft','rl'],['raters','val'],['val','rl'],['rl','check'],['rl','eval'],['eval','rel']]},
+ safety:{n:{data:[0,0,'Data|filtering','c',22,'filter'],train:[2,0,'Values|training','a',22,'scale'],model:[4,1,'Model','d',30,'llm'],ext:[0,3,'Outside|testers','c',22,'gov'],eval:[2,3,'Danger|tests','n',22,'flask'],guard:[6,1,'Live|safeguards','b',22,'shield'],user:[8,1,'Users','c',22,'people'],sec:[6,3.2,'Weight|security','n',22,'lock']},
+     e:[['data','train'],['train','model'],['model','eval'],['ext','eval'],['model','guard'],['guard','user'],['model','sec']]},
+ laws:{n:{co:[3,2,'AI companies|& users','d',30,'co'],eu:[1,0,'EU','b',26,'gov'],uk:[5,0,'UK','n',22,'gov'],asia:[5,4,'Korea, China,|Japan','a',22,'gov'],states:[1,4,'US states','c',22,'gov'],fed:[3,4.2,'US federal','c',22,'gov']},
+     e:[['eu','co'],['uk','co'],['asia','co'],['states','co'],['fed','co']]},
+ limits:{n:{q:[0,1,'Question','c',22,'person'],model:[2,1,'Model','d',30,'llm'],ans:[4,1,'Fluent|answer','b',22,'alert'],check:[6,1,'Your check','a',22,'check']},
+     e:[['q','model'],['model','ans'],['ans','check']]}
+};
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const K=56,R=44;
+function P(gx,gy){return [gx*K,gy*R]}
+function sz(h){return 44+((h||22)-22)*.75}
+function wire(a,b,straight){
+  if(straight||a[0]===b[0]||a[1]===b[1])return `M${a[0]} ${a[1]} L${b[0]} ${b[1]}`;
+  const m=(a[0]+b[0])/2;return `M${a[0]} ${a[1]} H${m} V${b[1]} H${b[0]}`;
+}
+function diagram(key,st){
+  const d=DG[key],on=st.on?new Set(st.on):null;
+  const flow=st.flow==='all'?d.e:(st.flow||[]);
+  const live=(a,b)=>flow.some(f=>(f[0]===a&&f[1]===b)||(f[0]===b&&f[1]===a));
+  const pos=k=>P(d.n[k][0],d.n[k][1]);
+  let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+  for(const k in d.n){const v=d.n[k],[x,y]=pos(k),w=sz(v[4]),ln=v[2]?v[2].split('|').length:0;
+    minx=Math.min(minx,x-Math.max(w/2,48));maxx=Math.max(maxx,x+Math.max(w/2,48));
+    miny=Math.min(miny,y-w/2-8);maxy=Math.max(maxy,y+w/2+7+ln*13);}
+  const vb=[minx-6,miny-6,maxx-minx+12,maxy-miny+12];
+  const names=Object.values(d.n).map(v=>v[2].replace(/\|/g,' ')).filter(Boolean).join(', ');
+  let s=`<div class="dg"><svg viewBox="${vb.map(n=>n.toFixed(0)).join(' ')}" role="img" aria-label="Diagram: ${names}">`;
+  for(const e of d.e){
+    const a=pos(e[0]),b=pos(e[1]),blocked=e[2]==='x';
+    s+=`<path class="ed ${blocked?'block':live(e[0],e[1])?'live':''}" d="${wire(a,b,d.straight)}"/>`;
+    if(blocked)s+=`<text class="xmark" x="${(a[0]+b[0])/2}" y="${(a[1]+b[1])/2-8}">✕</text>`;
+  }
+  if(!still)for(const f of flow){
+    if(!d.n[f[0]]||!d.n[f[1]])continue;
+    s+=`<circle class="pk" r="4.5"><animateMotion dur="1.6s" repeatCount="indefinite" path="${wire(pos(f[0]),pos(f[1]),d.straight)}"/></circle>`;
+  }
+  let lab='';
+  for(const k in d.n){
+    const [gx,gy,label,c,h,ic]=d.n[k],w=sz(h),[x,y]=pos(k),isOn=!on||on.has(k),hl=on&&isOn;
+    s+=`<g class="nd ${on?(isOn?'on':'off'):''}" style="--c:${COL[c]}">`;
+    if(ic==='dot'){
+      if(hl)s+=`<circle class="ring" cx="${x}" cy="${y}" r="${w/2+4}"/>`;
+      s+=`<circle class="tile" cx="${x}" cy="${y}" r="${w/2}"/>`;
+    }else{
+      const r=w*.26;
+      if(hl)s+=`<rect class="ring" x="${x-w/2-4}" y="${y-w/2-4}" width="${w+8}" height="${w+8}" rx="${r+4}"/>`;
+      s+=`<rect class="tile" x="${x-w/2}" y="${y-w/2}" width="${w}" height="${w}" rx="${r}"/>`+
+         `<g class="ic" transform="translate(${x-w*.3} ${y-w*.3}) scale(${(w*.6/24).toFixed(3)})">${ICONS[ic]||ICONS.llm}</g>`+
+         `<circle class="led" cx="${x+w/2-6}" cy="${y-w/2+6}" r="2.2">${hl&&!still?'<animate attributeName="opacity" values="1;.25;1" dur="1.4s" repeatCount="indefinite"/>':''}</circle>`;
+    }
+    s+=`</g>`;
+    label.split('|').forEach((t,i)=>{if(t)lab+=`<text class="lb ${on&&!isOn?'off':''}" x="${x}" y="${y+w/2+15+i*13}">${t}</text>`});
+  }
+  return s+lab+`</svg></div>`;
+}
+/* ---------- widgets ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const W={
+ family(el){el.innerHTML=`<div class="w"><h4>The family tree</h4>
+  <div class="nest" style="background:color-mix(in srgb,var(--stone) 35%,var(--card))">Artificial intelligence: any machine doing something that seems clever
+   <div class="nest" style="background:color-mix(in srgb,var(--mustard) 35%,var(--card))">Machine learning: learns from examples
+    <div class="nest" style="background:color-mix(in srgb,var(--teal) 35%,var(--card))">Deep learning: uses many-layered neural networks
+     <div class="nest" style="background:color-mix(in srgb,var(--violet) 40%,var(--card))">Large language models: ChatGPT, Claude, Gemini, Llama</div></div></div></div></div>`},
+ neuron(el){
+  el.innerHTML=`<div class="w"><h4>One neuron deciding: go for a walk?</h4>
+   <div class="row"><button class="btn small" id="n-sun" aria-pressed="true">Sunny: yes</button><button class="btn small" id="n-rain" aria-pressed="false">Raining: no</button></div>
+   <label>How much sunshine matters <input type="range" id="n-w1" min="-3" max="3" step="0.1" value="2"></label>
+   <label>How much rain matters <input type="range" id="n-w2" min="-3" max="3" step="0.1" value="-2.5"></label>
+   <div class="pb"><span>Go?</span><div class="trk"><i id="n-bar"></i></div><span id="n-val"></span></div>
+   <p class="note" id="n-sum"></p></div>`;
+  let sun=1,rain=0;
+  const up=()=>{const w1=+$('#n-w1').value,w2=+$('#n-w2').value,z=sun*w1+rain*w2,p=1/(1+Math.exp(-z));
+   $('#n-bar').style.width=(p*100)+'%';$('#n-val').textContent=Math.round(p*100)+'%';
+   $('#n-sum').textContent=`${sun} × ${w1.toFixed(1)} + ${rain} × ${w2.toFixed(1)} = ${z.toFixed(1)}, squashed into a score between 0 and 100%. The two sliders are the weights. Training is the process of setting them.`};
+  $('#n-sun').onclick=e=>{sun=1-sun;e.target.textContent='Sunny: '+(sun?'yes':'no');up()};
+  $('#n-rain').onclick=e=>{rain=1-rain;e.target.textContent='Raining: '+(rain?'yes':'no');up()};
+  $('#n-w1').oninput=up;$('#n-w2').oninput=up;up();},
+ tokenizer(el){
+  el.innerHTML=`<div class="w"><h4>Try it: type anything</h4><input type="text" id="tk-in" value="Unbelievably, the cat understood tokenisation!" aria-label="Text to split into tokens">
+   <div class="chips" id="tk-out"></div><p class="note" id="tk-n"></p>
+   <p class="note">This is a simplified imitation. Real tokenizers learn their pieces from data, but the effect is the same: common words stay whole, rare words break up.</p></div>`;
+  const cols=['var(--mustard)','var(--teal)','var(--coral)','var(--violet)','var(--stone)'];
+  const run=()=>{const t=$('#tk-in').value,raw=t.match(/\s*[A-Za-z']+|\s*\d|\s*[^\sA-Za-z\d]/g)||[],out=[];
+   for(const r of raw){const m=r.match(/^(\s*)(.*)$/),sp=m[1]?' ':'',w=m[2];
+    if(w.length<=7){out.push(sp+w)}else{out.push(sp+w.slice(0,4));for(let i=4;i<w.length;i+=4)out.push(w.slice(i,i+4))}}
+   $('#tk-out').innerHTML=out.map((x,i)=>`<span class="chip" style="background:color-mix(in srgb,${cols[i%5]} 55%,#fff)">${esc(x).replace(/ /g,'·')}</span>`).join('');
+   const words=(t.trim().match(/\S+/g)||[]).length;$('#tk-n').textContent=`${words} words became ${out.length} tokens. The dot marks a space that travels with the token.`};
+  $('#tk-in').oninput=run;run();},
+ nextword(el){
+  const L={mat:3.2,sofa:2.4,floor:2.2,roof:1.2,keyboard:.6,moon:-.4};
+  el.innerHTML=`<div class="w"><h4>The cat sat on the ___</h4><div id="nw-bars"></div>
+   <label>Temperature: <b id="nw-t"></b><input type="range" id="nw-s" min="0.1" max="2" step="0.1" value="1"></label>
+   <div class="row"><button class="btn small primary" id="nw-go">Pick a word</button><button class="btn small" id="nw-10">Pick 10</button></div>
+   <div class="out" id="nw-out">Your picks will appear here.</div></div>`;
+  let probs={},picks=[];
+  const draw=hit=>{const T=+$('#nw-s').value;$('#nw-t').textContent=T.toFixed(1)+(T<.5?' (safe, repetitive)':T>1.4?' (wild)':' (balanced)');
+   let z=0;for(const k in L){probs[k]=Math.exp(L[k]/T);z+=probs[k]}
+   $('#nw-bars').innerHTML=Object.keys(L).map(k=>{probs[k]/=z;return `<div class="pb ${k===hit?'hit':''}"><span>${k}</span><div class="trk"><i style="width:${probs[k]*100}%"></i></div><span>${(probs[k]*100).toFixed(0)}%</span></div>`}).join('')};
+  const pick=()=>{let r=Math.random(),c;for(const k in probs){r-=probs[k];c=k;if(r<=0)break}picks.push(c);return c};
+  $('#nw-s').oninput=()=>draw();
+  $('#nw-go').onclick=()=>{draw(pick());$('#nw-out').textContent=picks.slice(-14).join(', ')};
+  $('#nw-10').onclick=()=>{let c;for(let i=0;i<10;i++)c=pick();draw(c);$('#nw-out').textContent=picks.slice(-14).join(', ')};
+  draw();},
+ train(el){
+  const words=['blue','falling','green','pizza'];let lg=[.1,.5,.2,.6],n=0,hist=[];
+  el.innerHTML=`<div class="w"><h4>Training text says: “The sky is blue”</h4><div id="tr-bars"></div>
+   <div class="row"><button class="btn small primary" id="tr-go">Run one training step</button><button class="btn small" id="tr-r">Reset</button></div>
+   <div class="row" style="justify-content:space-between"><span class="note" id="tr-n"></span><svg id="tr-ch" viewBox="0 0 160 44" width="160" height="44" aria-label="Error over time"></svg></div></div>`;
+  const sm=()=>{const e=lg.map(Math.exp),z=e.reduce((a,b)=>a+b);return e.map(x=>x/z)};
+  const draw=()=>{const p=sm(),loss=-Math.log(p[0]);if(hist.length===n)hist.push(loss);
+   $('#tr-bars').innerHTML=words.map((w,i)=>`<div class="pb ${i===0?'hit':''}"><span>${w}</span><div class="trk"><i style="width:${p[i]*100}%"></i></div><span>${(p[i]*100).toFixed(0)}%</span></div>`).join('');
+   $('#tr-n').textContent=`Step ${n}. Error: ${loss.toFixed(2)}`;
+   const mx=hist[0],pts=hist.map((v,i)=>`${4+i*(152/Math.max(hist.length-1,8))},${40-v/mx*36}`).join(' ');
+   $('#tr-ch').innerHTML=`<polyline points="${pts}" fill="none" stroke="var(--coral)" stroke-width="2.5"/><line x1="0" y1="42" x2="160" y2="42" stroke="var(--ink)"/>`};
+  $('#tr-go').onclick=()=>{const p=sm();lg=lg.map((v,i)=>v+.7*((i===0?1:0)-p[i]));n++;draw()};
+  $('#tr-r').onclick=()=>{lg=[.1,.5,.2,.6];n=0;hist=[];draw()};draw();},
+ embed(el){
+  const pts={cat:[20,22],dog:[30,30],horse:[14,38],tiger:[33,14],pizza:[68,20],pasta:[80,29],bread:[66,36],cheese:[84,14],Paris:[30,70],London:[20,80],Tokyo:[40,82],Cairo:[30,92],bank:[72,68],loan:[82,78],cash:[66,84],price:[84,92]};
+  el.innerHTML=`<div class="w"><h4>A map of meaning</h4><p class="hint">Click each word to see its closest neighbours.</p><div class="map" id="em-map">${Object.keys(pts).map(k=>`<button data-k="${k}" style="left:${pts[k][0]}%;top:${pts[k][1]}%">${k}</button>`).join('')}</div><p class="note" id="em-n">Nobody placed these by hand. Training pushes words used in similar ways close together.</p></div>`;
+  $('#em-map').onclick=e=>{const k=e.target.dataset.k;if(!k)return;
+   const near=Object.keys(pts).filter(x=>x!==k).sort((a,b)=>Math.hypot(pts[a][0]-pts[k][0],pts[a][1]-pts[k][1])-Math.hypot(pts[b][0]-pts[k][0],pts[b][1]-pts[k][1])).slice(0,3);
+   el.querySelectorAll('.map button').forEach(b=>{b.className=b.dataset.k===k?'sel':near.includes(b.dataset.k)?'near':''});
+   $('#em-n').textContent=`Closest to “${k}”: ${near.join(', ')}. Real models use thousands of dimensions instead of two, so a word can be near many things at once.`};},
+ attention(el){
+  const words=['The','trophy',"didn't",'fit','in','the','suitcase','because','it','was','too'];
+  const wt={big:{trophy:.68,suitcase:.14,fit:.1},small:{trophy:.13,suitcase:.7,fit:.1}};let end='big';
+  el.innerHTML=`<div class="w"><h4>What does “it” mean? Change the last word</h4><div class="seg"><button data-e="big" aria-pressed="true">…too big</button><button data-e="small" aria-pressed="false">…too small</button></div><div class="chips" id="at-s"></div><p class="note" id="at-n"></p></div>`;
+  const draw=()=>{$('#at-s').innerHTML=[...words,end].map(w=>{const a=w==='it'?1:(wt[end][w]||0);
+    return `<span class="chip" style="background:${w==='it'?'var(--coral)':`color-mix(in srgb,var(--mustard) ${Math.round(a*100)}%,#fff)`}">${w}</span>`}).join('');
+   const t=end==='big'?'trophy':'suitcase';$('#at-n').textContent=`While reading “it”, the model puts about ${Math.round(wt[end][t]*100)}% of its attention on “${t}”. One changed word at the end moved it. (Weights here are illustrative.)`};
+  el.querySelector('.seg').onclick=e=>{if(!e.target.dataset.e)return;end=e.target.dataset.e;el.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.e===end));draw()};draw();},
+ context(el){
+  const WIN=1000,SYS=150;let turns=[],lost=0;
+  el.innerHTML=`<div class="w"><h4>A toy context window of 1,000 tokens</h4><div class="ctx" id="cx-bar"></div>
+   <div class="row"><button class="btn small primary" id="cx-go">Send a message</button><button class="btn small" id="cx-doc">Paste a long document</button><button class="btn small" id="cx-r">New chat</button></div><p class="note" id="cx-n"></p></div>`;
+  const draw=()=>{let tot=SYS+turns.reduce((a,b)=>a+b,0);while(tot>WIN&&turns.length>1){tot-=turns.shift();lost++}
+   $('#cx-bar').innerHTML=`<i style="width:${SYS/10}%;background:var(--stone)"></i>`+turns.map((t,i)=>`<i style="width:${t/10}%;background:${t>300?'var(--violet)':i%2?'var(--teal)':'var(--mustard)'}"></i>`).join('');
+   $('#cx-n').textContent=`${Math.min(tot,WIN)} of ${WIN} tokens used. Grey is hidden instructions. `+(lost?`${lost} early item${lost>1?'s have':' has'} fallen out, and the model can no longer see ${lost>1?'them':'it'}.`:'Everything so far is still visible to the model.')};
+  $('#cx-go').onclick=()=>{turns.push(60,140);draw()};$('#cx-doc').onclick=()=>{turns.push(420);draw()};$('#cx-r').onclick=()=>{turns=[];lost=0;draw()};draw();},
+ rag(el){
+  const docs=['Annual leave: full-time staff get 25 days plus bank holidays.','Travel: standard-class rail fares are claimable with a receipt.','Equipment over £500 needs sign-off from your line manager and IT.','The office is closed between 25 December and 1 January.'];
+  const Q=[{q:'How many days of holiday do I get?',s:[.91,.22,.15,.63],a:'You get 25 days of annual leave plus bank holidays [1]. The office also closes from 25 December to 1 January [4].'},
+           {q:'Can I expense a train ticket?',s:[.18,.89,.41,.12],a:'Yes. Standard-class rail fares are claimable if you keep the receipt [2].'},
+           {q:'Who approves a new laptop?',s:[.14,.38,.92,.10],a:'A laptop costs more than £500, so it needs sign-off from your line manager and IT [3].'}];
+  el.innerHTML=`<div class="w"><h4>Ask the (made-up) staff handbook</h4><div class="row" id="rg-q">${Q.map((x,i)=>`<button class="btn small" data-i="${i}">${x.q}</button>`).join('')}</div><div id="rg-d" style="display:flex;flex-direction:column;gap:6px"></div><div class="out" id="rg-a"></div></div>`;
+  const draw=i=>{const x=Q[i],rank=[0,1,2,3].sort((a,b)=>x.s[b]-x.s[a]),top=rank.slice(0,2);
+   $('#rg-d').innerHTML=docs.map((d,j)=>`<div class="doc ${top.includes(j)?'top':''}"><span>[${j+1}] ${d}</span><b>match ${x.s[j].toFixed(2)}</b></div>`).join('');
+   $('#rg-a').innerHTML=`<b>Sent to the model:</b> the question + chunks ${top.map(j=>'['+(j+1)+']').sort().join(' and ')}.<br><b>Answer:</b> ${x.a}`;
+   el.querySelectorAll('#rg-q button').forEach((b,j)=>b.classList.toggle('primary',j===i))};
+  $('#rg-q').onclick=e=>{if(e.target.dataset.i)draw(+e.target.dataset.i)};draw(0);},
+ size(el){
+  const S=[{n:'Small',sp:95,co:8,ab:45,g:'Sorting emails, tagging, autocomplete, quick replies, running on a phone or laptop.'},
+           {n:'Mid-size',sp:65,co:35,ab:72,g:'Everyday chat, summaries, drafting, most customer-support and coding help.'},
+           {n:'Large',sp:30,co:100,ab:96,g:'Hard reasoning, long research tasks, complex code, work where mistakes are expensive.'}];
+  el.innerHTML=`<div class="w"><h4>Slide between model sizes</h4><input type="range" id="sz" min="0" max="2" step="1" value="1" aria-label="Model size"><div class="big" id="sz-n"></div><div id="sz-b"></div><p class="note" id="sz-g"></p><p class="note">Bars are relative and illustrative, not benchmark results.</p></div>`;
+  const draw=()=>{const s=S[+$('#sz').value];$('#sz-n').textContent=s.n;$('#sz-g').textContent='Good for: '+s.g;
+   $('#sz-b').innerHTML=[['Speed',s.sp],['Cost',s.co],['Ability',s.ab]].map(r=>`<div class="pb"><span>${r[0]}</span><div class="trk"><i style="width:${r[1]}%"></i></div><span></span></div>`).join('')};
+  $('#sz').oninput=draw;draw();},
+ privacy(el){
+  const M={c:{n:'Personal app',r:[['Used for training?','Your choice. A privacy setting controls whether your chats help improve models.'],['Who is in charge?','You, one account at a time.'],['Kept for','Depends on that setting and on what you delete.'],['Fits','Individuals. Not where staff should put company secrets.']]},
+           e:{n:'Team / Enterprise',r:[['Used for training?','No by default. Prompts and replies are not used to train models unless the company opts in.'],['Who is in charge?','The company. Admins manage members, sign-in, connectors and policies.'],['Kept for','Configurable retention on Enterprise.'],['Fits','Everyday staff use with central control and audit.']]},
+           a:{n:'API & cloud',r:[['Used for training?','No by default, under the commercial terms.'],['Who is in charge?','The company’s engineers, who build Claude into their own apps.'],['Kept for','Typically up to 30 days. Zero data retention is available for approved customers.'],['Fits','Custom products, or running through Amazon Bedrock, Google Cloud or Microsoft Foundry under that cloud’s own data terms.']]}};
+  let k='e';el.innerHTML=`<div class="w"><h4>Same model, three different deals</h4><div class="seg">${Object.keys(M).map(x=>`<button data-k="${x}">${M[x].n}</button>`).join('')}</div><dl class="kv" id="pv"></dl></div>`;
+  const draw=()=>{$('#pv').innerHTML=M[k].r.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');el.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k))};
+  el.querySelector('.seg').onclick=e=>{if(e.target.dataset.k){k=e.target.dataset.k;draw()}};draw();},
+ energy(el){
+  el.innerHTML=`<div class="w"><h4>Your own AI electricity bill</h4>
+   <label>Prompts per day: <b id="en-p"></b><input type="range" id="en-s" min="1" max="300" value="30"></label>
+   <label>Kind of prompt <select id="en-k"><option value="1">Ordinary text question (measured: 0.24 Wh)</option><option value="10">Long or “thinking” task (assume 10× as much)</option><option value="100">Heavy image or video generation (assume 100×)</option></select></label>
+   <div class="big" id="en-wh"></div><dl class="kv" id="en-c"></dl>
+   <p class="note">0.24 Wh is Google’s published median for a Gemini text prompt (August 2025). The 10× and 100× options are rough assumptions to show the spread, not measurements.</p></div>`;
+  const draw=()=>{const n=+$('#en-s').value,wh=n*.24*+$('#en-k').value;$('#en-p').textContent=n;
+   $('#en-wh').textContent=(wh<100?wh.toFixed(1):Math.round(wh))+' Wh a day';
+   $('#en-c').innerHTML=[['Phone charges',(wh/15).toFixed(1)+' full charges (about 15 Wh each)'],['Kettle',(wh/110).toFixed(2)+' boils of one litre (about 110 Wh each)'],['LED bulb',(wh/10).toFixed(1)+' hours of a 10 W bulb'],['Per year',(wh*365/1000).toFixed(1)+' kWh']].map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')};
+  $('#en-s').oninput=draw;$('#en-k').onchange=draw;draw();},
+ apireq(el){
+  const V={plain:{n:'Plain question',j:`{
+  "model": "some-model-name",
+  "max_tokens": 300,
+  "messages": [
+    {"role": "user",
+     "content": "Summarise this email: ..."}
+  ]
+}`,t:'The minimum: which model, a cap on reply length, and the conversation so far.'},
+   sys:{n:'With instructions',j:`{
+  "model": "some-model-name",
+  "max_tokens": 300,
+  "system": "You are a polite support
+             agent for a bike shop.",
+  "messages": [
+    {"role": "user",
+     "content": "My brakes squeak."}
+  ]
+}`,t:'A system prompt sets the role and rules. Every chatbot product has one you never see.'},
+   tool:{n:'With a tool',j:`{
+  "model": "some-model-name",
+  "max_tokens": 300,
+  "tools": [
+    {"name": "check_stock",
+     "description": "Look up stock
+                     for a part"}
+  ],
+  "messages": [
+    {"role": "user",
+     "content": "Any brake pads in?"}
+  ]
+}`,t:'The app lists tools it is willing to run. The model may reply with a request to call one.'}};
+  let k='plain';el.innerHTML=`<div class="w"><h4>What an app actually sends</h4><div class="seg">${Object.keys(V).map(x=>`<button data-k="${x}">${V[x].n}</button>`).join('')}</div><pre class="out" id="ap-j" style="margin:0;overflow-x:auto;white-space:pre"></pre><p class="note" id="ap-t"></p><p class="note">Simplified, but close to the real shape. A secret API key travels with it so the provider knows who to bill.</p></div>`;
+  const draw=()=>{$('#ap-j').textContent=V[k].j;$('#ap-t').textContent=V[k].t;el.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k))};
+  el.querySelector('.seg').onclick=e=>{if(e.target.dataset.k){k=e.target.dataset.k;draw()}};draw();},
+ bill(el){
+  el.innerHTML=`<div class="w"><h4>Price up one request</h4>
+   <label>Tokens you send (input): <b id="bl-i"></b><input type="range" id="bl-is" min="100" max="50000" step="100" value="2000"></label>
+   <label>Tokens it writes (output): <b id="bl-o"></b><input type="range" id="bl-os" min="50" max="8000" step="50" value="500"></label>
+   <div class="big" id="bl-c"></div><p class="note" id="bl-n"></p>
+   <p class="note">Example prices only: $3 per million input tokens, $15 per million output. Real prices vary a lot by model.</p></div>`;
+  const draw=()=>{const i=+$('#bl-is').value,o=+$('#bl-os').value,ci=i*3/1e6,co=o*15/1e6,c=ci+co;
+   $('#bl-i').textContent=i.toLocaleString();$('#bl-o').textContent=o.toLocaleString();
+   $('#bl-c').textContent='$'+c.toFixed(4);
+   $('#bl-n').textContent=`Input $${ci.toFixed(4)} + output $${co.toFixed(4)}. Do this a million times a month and it is $${Math.round(c*1e6).toLocaleString()}.`};
+  $('#bl-is').oninput=draw;$('#bl-os').oninput=draw;draw();},
+ deflate(el){
+  el.innerHTML=`<div class="w"><h4>Same quality, three years on</h4>
+   <label>Years since launch: <b id="df-y"></b><input type="range" id="df-s" min="0" max="3" step="1" value="0"></label>
+   <div class="big" id="df-p"></div>
+   <div class="pb"><span>Price</span><div class="trk"><i id="df-b"></i></div><span></span></div>
+   <p class="note" id="df-n"></p>
+   <p class="note">Based on a16z’s 2024 analysis: text of the quality that cost $60 per million tokens in late 2021 cost about $0.06 three years later. The bar is on a log scale. The smooth 10× a year is their trend line.</p></div>`;
+  const draw=()=>{const y=+$('#df-s').value,p=60/Math.pow(10,y);$('#df-y').textContent=y;
+   $('#df-p').textContent='$'+(p>=1?p.toFixed(0):p.toFixed(2))+' per million tokens';
+   $('#df-b').style.width=(100-y*30)+'%';
+   $('#df-n').textContent=`A novel’s worth of text (about 130,000 tokens) at this price: $${(p*.13).toFixed(p*.13<1?3:2)}.`};
+  $('#df-s').oninput=draw;draw();},
+ mydata(el){
+  const M={on:{n:'Personal, sharing on',a:'It can.',t:'New or resumed chats may be kept for up to five years and included as examples when a future model is trained. Chats you delete are left out. Turn the setting off and later chats are excluded.'},
+           off:{n:'Personal, sharing off',a:'No.',t:'Your chats are not used to train future models and stay on the standard 30-day retention. Feedback you choose to send, such as a thumbs up or down, can still be used.'},
+           work:{n:'Work plan or API',a:'No, by default.',t:'Under the commercial terms, prompts and replies are not used for training unless the organisation opts in. The company, not the employee, controls this.'}};
+  let k='on';el.innerHTML=`<div class="w"><h4>Will the next version learn from my chats?</h4><div class="seg">${Object.keys(M).map(x=>`<button data-k="${x}">${M[x].n}</button>`).join('')}</div><div class="big" id="md-a"></div><p style="margin:0" id="md-t"></p><p class="note">This describes Anthropic’s published policy for Claude as of late 2025. Other providers differ, and policies change, so check the privacy settings of whatever you use.</p></div>`;
+  const draw=()=>{$('#md-a').textContent=M[k].a;$('#md-t').textContent=M[k].t;el.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k))};
+  el.querySelector('.seg').onclick=e=>{if(e.target.dataset.k){k=e.target.dataset.k;draw()}};draw();},
+ risklist(el){
+  const R=[['Scams and deepfakes','Cloned voices, fake video and flawless phishing emails are now cheap to make.','Confirm unusual requests for money through a second channel. Agree a family code word.'],
+           ['Your privacy','What you paste may be stored, reviewed for abuse, or used for training depending on settings.','Check the privacy settings. Never paste other people’s personal data or company secrets into a personal account.'],
+           ['Over-reliance','Skills fade when a tool always does the work, and unchecked errors pile up quietly.','Let it draft, then check. Do the thinking yourself on things you need to stay good at.'],
+           ['Agents acting wrongly','An agent with access can delete files, send emails or spend money by mistake, or after being tricked.','Give the least access the task needs. Keep approval on for anything that cannot be undone.'],
+           ['Jobs','Tasks get automated unevenly. Some roles shrink, others change shape, new ones appear.','Learn to direct and check AI work in your own field. That skill is in demand.'],
+           ['Dangerous capability','Strong models can help attackers find software flaws or misuse science.','Mostly for makers and governments: testing before release, access limits, monitoring for abuse.'],
+           ['Loss of control','A future system pursuing a goal in ways nobody intended, at a scale hard to stop.','An open research problem called alignment. It is why safety testing and human oversight matter now.']];
+  el.innerHTML=`<div class="w"><h4>Seven risks</h4><p class="hint">Click each button to see the information.</p><div class="row" id="rk-b">${R.map((r,i)=>`<button class="btn small" data-i="${i}">${r[0]}</button>`).join('')}</div><dl class="kv" id="rk-d"></dl></div>`;
+  const draw=i=>{$('#rk-d').innerHTML=`<dt>What it is</dt><dd>${R[i][1]}</dd><dt>What helps</dt><dd>${R[i][2]}</dd>`;el.querySelectorAll('#rk-b button').forEach((b,j)=>b.classList.toggle('primary',j===i))};
+  $('#rk-b').onclick=e=>{if(e.target.dataset.i)draw(+e.target.dataset.i)};draw(0);},
+ rlsim(el,st){
+  let sloppy=!!st.sloppy,p,ch,round,hist;
+  const reset=()=>{p=.2;ch=.04;round=0;hist=[]};reset();
+  el.innerHTML=`<div class="w"><h4>Practice task: “write code that sorts a list”</h4>
+   <div class="seg" id="rl-m"><button data-m="0">Strict checker: runs real tests</button><button data-m="1">Sloppy checker: only checks it runs</button></div>
+   <div class="chips" id="rl-a" aria-label="Eight attempts"></div>
+   <div class="row"><button class="btn small primary" id="rl-go">Run a practice round</button><button class="btn small" id="rl-5">Run 5 rounds</button><button class="btn small" id="rl-r">Reset</button></div>
+   <div class="pb"><span>Passes</span><div class="trk"><i id="rl-pass"></i></div><span id="rl-pv"></span></div>
+   <div class="pb hit"><span>Truly right</span><div class="trk"><i id="rl-true"></i></div><span id="rl-tv"></span></div>
+   <p class="note" id="rl-n"></p></div>`;
+  const rates=()=>{const t=(1-ch)*p;return {t,pass:sloppy?ch+t:t}};
+  const draw=att=>{const r=rates();
+   $('#rl-a').innerHTML=(att||[]).map(a=>`<span class="chip" style="background:${a==='ok'?'color-mix(in srgb,var(--good) 45%,#fff)':a==='cheat'?(sloppy?'color-mix(in srgb,var(--mustard) 70%,#fff)':'color-mix(in srgb,var(--bad) 35%,#fff)'):'color-mix(in srgb,var(--bad) 35%,#fff)'}">${a==='ok'?'✓ sorted':a==='cheat'?(sloppy?'✓ faked':'✗ faked'):'✗ wrong'}</span>`).join('')||'<span class="note">Each round the model tries the task 8 times.</span>';
+   $('#rl-pass').style.width=r.pass*100+'%';$('#rl-pv').textContent=Math.round(r.pass*100)+'%';
+   $('#rl-true').style.width=r.t*100+'%';$('#rl-tv').textContent=Math.round(r.t*100)+'%';
+   el.querySelectorAll('#rl-m button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.m==='1')===sloppy));
+   $('#rl-n').textContent=round===0?'Rewarded attempts get reinforced. Unrewarded ones get discouraged.':
+     sloppy&&ch>.4?`Round ${round}. The model has learned to fake it: it prints something that looks right without sorting. The checker is happy, the code is useless. This is reward hacking.`:
+     `Round ${round}. ${sloppy?'Watch the gap between the two bars.':'Only genuinely correct answers are rewarded, so real skill climbs.'}`};
+  const step=()=>{const att=[];let ok=0,cheat=0;
+   for(let i=0;i<8;i++){const r=Math.random();if(r<ch){att.push('cheat');cheat++}else if(Math.random()<p){att.push('ok');ok++}else att.push('wrong')}
+   p+=.35*(ok/8)*(1-p)+.02*(1-p);
+   ch=sloppy?Math.min(.97,ch+.6*(cheat/8+.02)*(1-ch)):Math.max(.01,ch*.7);
+   round++;return att};
+  $('#rl-go').onclick=()=>draw(step());
+  $('#rl-5').onclick=()=>{let a;for(let i=0;i<5;i++)a=step();draw(a)};
+  $('#rl-r').onclick=()=>{reset();draw()};
+  $('#rl-m').onclick=e=>{if(e.target.dataset.m){sloppy=e.target.dataset.m==='1';reset();draw()}};
+  draw();},
+ safetymap(el){
+  const R=[['Weapons help','A model giving real help to someone trying to make biological or chemical weapons.','Remove the riskiest material from training data. Test every new model for this before release. Run classifiers that block such requests. Switch on stricter safeguards once a model crosses a set capability level.','The same knowledge serves medicine and vaccine research, so blocking too much harms legitimate scientists.'],
+   ['Cyberattacks','Models that can find and exploit flaws in software faster than people can patch them.','Cyber tests before release. Give the strongest models to vetted defenders first. Watch for attack patterns. Let government testers try the model before launch.','Defenders and attackers need exactly the same skills.'],
+   ['Stolen models','Someone steals the model file and strips out its safeguards.','Tight security around the weights, insider-threat controls, very limited access.','A model file is huge, extremely valuable, and a target for well-funded attackers.'],
+   ['Model misbehaving','A model cheats on tasks, misleads its users, or pursues a goal in ways nobody intended.','Values training, published constitutions, tests in simulated scenarios, interpretability research that looks inside the model, monitoring agents while they work.','Models can act differently when they suspect they are being tested.'],
+   ['Vulnerable users','Bad advice in a crisis, unhealthy dependence, or children seeing unsuitable content.','Training for careful crisis responses and signposting to real help. Age protections. Laws such as California’s companion-chatbot law now require written protocols.','Being protective without being preachy or unhelpful is a fine line.'],
+   ['Scams at scale','Phishing, fake reviews and disinformation produced by the million.','Usage policies, detection of coordinated misuse, account bans, labels and hidden watermarks on generated media.','Open-weight models can be run without any of these checks.']];
+  el.innerHTML=`<div class="w"><h4>Six worries</h4><p class="hint">Click each button to see the information.</p><div class="row" id="sm-b">${R.map((r,i)=>`<button class="btn small" data-i="${i}">${r[0]}</button>`).join('')}</div><dl class="kv" id="sm-d"></dl></div>`;
+  const draw=i=>{$('#sm-d').innerHTML=`<dt>The worry</dt><dd>${R[i][1]}</dd><dt>What companies do</dt><dd>${R[i][2]}</dd><dt>Why it is hard</dt><dd>${R[i][3]}</dd>`;el.querySelectorAll('#sm-b button').forEach((b,j)=>b.classList.toggle('primary',j===i))};
+  $('#sm-b').onclick=e=>{if(e.target.dataset.i)draw(+e.target.dataset.i)};draw(0);},
+ checklist(el){
+  const L={me:{n:'For you',i:['I have checked the training setting on every AI app I use','I never paste passwords, ID numbers or other people’s personal details','I check important facts, numbers and quotes against a real source','My family has a code word for urgent money requests, in case of cloned voices','Two-step sign-in is on for my AI and email accounts','I know which agents and connectors can act for me, and what they can reach','Children in my home use age-appropriate AI apps, and we talk about them']},
+           org:{n:'For your organisation',i:['A written AI policy says which tools are approved, for which data','Staff use work accounts that do not train on company data','Staff have had basic AI training (an EU AI Act duty since Feb 2025)','Agents get the least access they need, with human approval for anything irreversible','We keep logs of who used AI for what','Vendors are checked for data retention, location and security reports','AI decisions about people, like hiring or credit, have human review and records','AI-generated content is labelled where the law requires it','We have a plan for AI incidents: a leak, a wrong decision, a deepfake of an executive']}};
+  let k='me';const done={me:new Set(),org:new Set()};
+  el.innerHTML=`<div class="w"><h4>Safety checklist</h4><div class="seg" id="ck-t">${Object.keys(L).map(x=>`<button data-k="${x}">${L[x].n}</button>`).join('')}</div><div id="ck-l"></div><div class="pb"><span>Done</span><div class="trk"><i id="ck-b"></i></div><span id="ck-v"></span></div><p class="note" id="ck-n"></p></div>`;
+  const score=()=>{const n=L[k].i.length,d=done[k].size;$('#ck-b').style.width=d/n*100+'%';$('#ck-v').textContent=d+'/'+n;
+   $('#ck-n').textContent=d===n?'All done. Revisit it whenever you add a new AI tool.':d>n/2?'Good start. The unticked items are your to-do list.':'Pick one unticked item and do it this week.'};
+  const draw=()=>{$('#ck-l').innerHTML=L[k].i.map((t,i)=>`<label class="cl" for="ck-${k}-${i}"><input type="checkbox" id="ck-${k}-${i}" data-i="${i}" ${done[k].has(i)?'checked':''}><span>${t}</span></label>`).join('');
+   el.querySelectorAll('#ck-t button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));score()};
+  $('#ck-t').onclick=e=>{if(e.target.dataset.k){k=e.target.dataset.k;draw()}};
+  $('#ck-l').onchange=e=>{const i=+e.target.dataset.i;e.target.checked?done[k].add(i):done[k].delete(i);score()};draw();},
+ eutiers(el){
+  const T=[{n:'Banned',w:42,c:'var(--bad)',d:'Since 2 Feb 2025',t:'Social scoring of citizens. AI that manipulates people or exploits their vulnerabilities. Scraping faces from the internet to build recognition databases. Emotion recognition at work or school. From 2 Dec 2026, apps that make sexual deepfakes of real people are added.',x:'Fines up to €35 million or 7% of worldwide turnover.'},
+   {n:'High-risk',w:62,c:'var(--coral)',d:'From 2 Dec 2027 (2 Aug 2028 inside regulated products)',t:'AI that decides things about people’s lives: hiring, credit scores, exam marking, access to public services, policing, border control, and AI inside medical devices or machinery.',x:'Needs risk management, good-quality data, human oversight, logging and registration before use. Originally due Aug 2026; pushed back by the Digital Omnibus.'},
+   {n:'Transparency',w:82,c:'var(--mustard)',d:'Since 2 Aug 2026',t:'Chatbots must tell you that you are talking to AI. Deepfakes must be labelled, as must AI-written text on public-interest topics unless a person has reviewed it. Generated images, audio and video must carry a hidden machine-readable mark.',x:'Applies whatever the risk level. Systems already on the market before August have until 2 Dec 2026 for the hidden mark.'},
+   {n:'Minimal',w:100,c:'var(--teal)',d:'No new duties',t:'Most AI: spam filters, recommendations, game characters, writing aids.',x:'Voluntary codes of conduct are encouraged.'},
+   {n:'General-purpose models',w:100,c:'var(--violet)',d:'Since 2 Aug 2025, enforceable since 2 Aug 2026',t:'Applies to the makers of models like Claude, GPT and Gemini. They must document the model, publish a summary of its training data and follow EU copyright rules.',x:'The most powerful models must also assess systemic risks, report serious incidents and protect against cyberattacks.'}];
+  el.innerHTML=`<div class="w"><h4>EU AI Act: the four risk levels</h4><p class="hint">Click each box to see the information.</p><div id="eu-p" style="display:flex;flex-direction:column;gap:6px">${T.map((t,i)=>`<button class="tier" data-i="${i}" style="width:${t.w}%;background:color-mix(in srgb,${t.c} ${i===4?55:60}%,#fff);${i===4?'margin-top:8px;border-style:dashed':''}">${t.n}</button>`).join('')}</div><dl class="kv" id="eu-d"></dl></div>`;
+  const draw=i=>{const t=T[i];$('#eu-d').innerHTML=`<dt>When</dt><dd>${t.d}</dd><dt>Covers</dt><dd>${t.t}</dd><dt>What it means</dt><dd>${t.x}</dd>`;el.querySelectorAll('.tier').forEach((b,j)=>b.classList.toggle('sel',j===i))};
+  $('#eu-p').onclick=e=>{const b=e.target.closest('.tier');if(b)draw(+b.dataset.i)};draw(0);},
+ laws(el){
+  const T=[
+   ['2025-02-02','eu','EU AI Act: bans and AI literacy','Bans the most harmful uses, such as social scoring and manipulative AI, and requires organisations to give staff basic AI training.','https://eur-lex.europa.eu/eli/reg/2024/1689/oj'],
+   ['2025-05-28','asia','Japan: AI Promotion Act','Japan’s first AI law. Sets national principles and promotes research and use. No fines.','https://oecd.ai/en/dashboards/policy-initiatives/act-on-promotion-of-research,-development,-and-utilization-of-artificial-intelligence-related-technologies'],
+   ['2025-08-02','eu','EU AI Act: general-purpose model rules','Makers of large models must document them, summarise their training data and respect copyright. The biggest must also manage systemic risks.','https://artificialintelligenceact.eu/'],
+   ['2025-09-01','asia','China: AI content labelling rules','All AI-generated text, images, audio and video must carry visible labels and hidden metadata labels.','https://www.chinalawtranslate.com/en/ai-labeling/'],
+   ['2025-10-10','eu','Italy: national AI law (Law 132/2025)','First EU country with its own AI law on top of the AI Act: names regulators, adds sector rules and criminal offences.','https://oecd.ai/en/dashboards/policy-initiatives/italy-ai-law-1322025'],
+   ['2025-12-11','us','US: executive order on state AI laws (EO 14365)','Sets up a Justice Department task force to challenge state AI laws and calls for one national framework.','https://www.whitehouse.gov/fact-sheets/2025/12/fact-sheet-president-donald-j-trump-ensures-a-national-policy-framework-for-artificial-intelligence/'],
+   ['2026-01-01','us','California: SB 53, frontier AI transparency','Big AI developers must publish safety frameworks and transparency reports, report critical safety incidents, and protect whistleblowers.','https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB53'],
+   ['2026-01-01','us','California: SB 243, companion chatbots','Companion chatbots must disclose they are AI, keep a suicide and self-harm protocol, and add protections for minors.','https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260SB243'],
+   ['2026-01-22','asia','South Korea: AI Basic Act','A full national AI law: duties for high-impact AI, labels on generated content, local representatives for foreign firms.','https://www.trade.gov/market-intelligence/south-korea-ai-basic-act'],
+   ['2026-03-20','us','US: White House national AI framework','Asks Congress for one federal standard that would override most state AI laws. Not law until Congress acts.','https://www.morganlewis.com/pubs/2026/03/white-house-ai-framework-puts-federal-preemption-at-the-center-of-the-debate',1],
+   ['2026-05-19','us','US: TAKE IT DOWN Act, removal duty','Platforms must remove non-consensual intimate images, including AI deepfakes, within 48 hours of a valid request.','https://ftc.gov/business-guidance/blog/2026/05/take-it-down-act-enforcement-starts-now-what-know-about-ftc-tida'],
+   ['2026-06-02','us','US: executive order on frontier model security (EO 14409)','Creates a voluntary scheme for developers to give the government up to 30 days of pre-release access to their most advanced models.','https://skadden.com/insights/publications/2026/06/new-ai-executive-order'],
+   ['2026-06-04','us','US: Great American AI Act (draft)','Bipartisan House draft: frontier model safety rules plus a three-year pause on state laws that regulate AI development.','https://fpf.org/blog/frontier-ai-goes-federal-how-the-great-american-ai-act-compares-to-state-laws/',1],
+   ['2026-07-27','eu','EU: Digital Omnibus on AI','Amends the AI Act. Delays the high-risk rules to 2027 and 2028 and bans apps that make sexual deepfakes.','https://eeas.europa.eu/delegations/chile/artificial-intelligence-council-gives-final-green-light-simplify-and-streamline-rules_en'],
+   ['2026-08-02','eu','EU AI Act: transparency duties','Chatbots must say they are AI; deepfakes must be labelled. Enforcement powers over general-purpose models also start.','https://artificialintelligenceact.eu/transparency-rules-article-50/'],
+   ['2026-12-02','eu','EU AI Act: watermarks and deepfake-app ban','Generative systems already on the market must add hidden machine-readable marks. The ban on sexual deepfake apps applies.','https://usercentrics.com/knowledge-hub/eu-ai-act/'],
+   ['2027-01-01','us','New York: RAISE Act','Large frontier developers must publish safety frameworks and report critical safety incidents within 72 hours. A new state office oversees them.','https://www.governor.ny.gov/news/governor-hochul-signs-nation-leading-legislation-require-ai-frameworks-ai-frontier-models'],
+   ['2027-01-01','us','Colorado: automated decision-making law (SB 26-189)','Replaces the 2024 Colorado AI Act. Disclosure duties when automated systems shape decisions on jobs, housing, loans, health and education.','https://www.gtlaw.com/en/insights/2026/5/colorado-repeals-and-replaces-the-colorado-ai-act'],
+   ['2027-12-02','eu','EU AI Act: high-risk rules','AI used in hiring, credit, education, public services and policing must meet risk, data, oversight and logging requirements.','https://eeas.europa.eu/delegations/chile/artificial-intelligence-council-gives-final-green-light-simplify-and-streamline-rules_en'],
+   ['2028-08-02','eu','EU AI Act: high-risk AI inside products','The same requirements for AI built into regulated products such as medical devices and machinery.','https://eeas.europa.eu/delegations/chile/artificial-intelligence-council-gives-final-green-light-simplify-and-streamline-rules_en'],
+   [null,'uk','UK: no dedicated AI law yet','The May 2026 King’s Speech contained no AI bill. Existing data, consumer and online-safety laws apply. The next chance is late 2027 at the earliest.','https://www.lewissilkin.com/insights/2026/09/14/ai-judgment-day-on-the-horizon-while-uk-lawmakers-play-catch-up',1]];
+  const RG={all:'All',eu:'Europe',us:'United States',uk:'UK',asia:'Asia'};let f='all';
+  el.innerHTML=`<div class="w"><h4>AI laws, in date order</h4><div class="row" id="lw-f">${Object.keys(RG).map(x=>`<button class="btn small" data-f="${x}">${RG[x]}</button>`).join('')}</div><div class="tl" id="lw-l"></div><p class="note">Checked on 25 November 2026. In force and coming update from your device’s date; proposals stay marked as proposals. Links go to the law itself where possible, otherwise to a summary by a government body or law firm.</p></div>`;
+  const now=new Date().toISOString().slice(0,10),fmt=d=>new Date(d+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+  const draw=()=>{let out='',marked=false;
+   for(const r of T.filter(r=>f==='all'||r[1]===f)){
+    const st=r[5]?['prop','Proposed']:r[0]<=now?['in','In effect']:['soon','Coming'];
+    if(!marked&&(!r[0]||r[0]>now)){out+=`<div class="today">Today</div>`;marked=true}
+    out+=`<div class="li"><div class="ld">${r[0]?fmt(r[0]):'No date'}</div><div><span class="st ${st[0]}">${st[1]}</span> <span class="rg">${RG[r[1]]}</span><br><b>${r[2]}</b><p>${r[3]}</p><a href="${r[4]}" target="_blank" rel="noopener">Read more ↗</a></div></div>`}
+   $('#lw-l').innerHTML=out;el.querySelectorAll('#lw-f button').forEach(b=>b.classList.toggle('primary',b.dataset.f===f))};
+  $('#lw-f').onclick=e=>{if(e.target.dataset.f){f=e.target.dataset.f;draw()}};draw();},
+ quiz(el,st){
+  const q=st.q;el.innerHTML=`<div class="w"><h4>Quick check</h4><p style="margin:0;font-weight:700">${q.q}</p>${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}<p class="note" id="qz-n" aria-live="polite"></p></div>`;
+  el.onclick=e=>{const b=e.target.closest('.opt');if(!b)return;const i=+b.dataset.i;
+   if(i===q.a){b.classList.add('right');$('#qz-n').textContent='Correct. '+q.y}else{b.classList.add('wrong');$('#qz-n').textContent='Not that one. Try again.'}};}
+};
+
+/* ---------- content ---------- */
+const CH=[
+{s:'basics',t:'What AI actually is',d:'Rules versus learning, and where chatbots sit in the family.',g:'ai',steps:[
+ {t:'Old software follows rules',on:['dev','rules','out'],flow:[['dev','rules'],['rules','out']],b:`<p>For decades, software meant a person writing exact rules. <i>If the password is wrong three times, lock the account.</i> The computer does only what the rules say.</p><p>That works for payroll. It fails for “is this a photo of a cat?”, because nobody can write down the rules for cat.</p>`},
+ {t:'Machine learning finds the rules itself',on:['data','learn','model'],flow:[['data','learn'],['learn','model']],b:`<p>Instead of rules, you give the computer <b class="t">examples</b>: a million photos labelled cat or not-cat. A learning procedure adjusts itself until its guesses match the labels.</p><p class="key">Nobody tells it what a cat looks like. It works that out from the examples.</p>`},
+ {t:'The result is called a model',on:['model','out'],flow:[['model','out']],b:`<p>When learning finishes you are left with a <b class="t">model</b>: a big file of numbers that captures the patterns it found. You can now show it something new and it gives an answer.</p><p>Two phases, then. <b>Training</b> builds the model once. <b>Inference</b> is every time someone uses it.</p>`},
+ {t:'Where chatbots fit',w:'family',b:`<p>“AI” is the broad label. Inside it sits machine learning, inside that deep learning, and inside that the <b class="t">large language model</b> or LLM, the thing behind ChatGPT, Claude and Gemini.</p><p>The rest of this guide is about that innermost box.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'What is the main difference between classic software and machine learning?',o:['Machine learning runs on faster computers','Classic software follows written rules; machine learning finds patterns from examples','Machine learning never makes mistakes'],a:1,y:'The rules come out of the data instead of out of a programmer’s head.'},b:`<p>One question before moving on.</p>`}]},
+{s:'neurons',t:'Neural networks',d:'Tiny number-makers wired together, with billions of dials.',g:'neurons',steps:[
+ {t:'A neuron is a small sum',on:['i1','i2','i3','h2'],flow:[['i1','h2'],['i2','h2'],['i3','h2']],b:`<p>An artificial neuron takes some numbers in, multiplies each by a <b class="t">weight</b>, adds them up, and passes one number on. That is all it does.</p><p>A weight says how much that input matters. Big positive: matters a lot. Negative: counts against.</p>`},
+ {t:'Play with one',w:'neuron',b:`<p>Here is a single neuron making a single decision. Flip the inputs and drag the weights.</p><p>Notice that the neuron’s “opinion” lives entirely in the two weights.</p>`},
+ {t:'Layers build bigger ideas',flow:'all',b:`<p>Wire thousands of neurons into layers and each layer can combine what the last one found. In an image model, early layers pick out edges, later layers whiskers, later still “cat”.</p><p>Stack many layers and you have <b class="t">deep</b> learning.</p>`},
+ {t:'Parameters are the dials',on:['h1','h2','h3'],b:`<p>Every weight is one <b class="t">parameter</b>. When a model is described as having 70 billion parameters, that is 70 billion dials, each set to a particular value during training.</p><p class="key">A model’s knowledge is not stored as sentences. It is smeared across those dials.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'What is a “parameter” in a neural network?',o:['A stored copy of a web page','One adjustable number (a weight) set during training','A rule written by an engineer'],a:1,y:'Billions of these small numbers together are the model.'},b:`<p>One question.</p>`}]},
+{s:'tokens',t:'Tokens',d:'How text becomes numbers a network can use.',g:'tokens',steps:[
+ {t:'Networks only do arithmetic',on:['text','tok'],flow:[['text','tok']],b:`<p>A neural network cannot read letters. Before anything else, your text is chopped into pieces called <b class="t">tokens</b>.</p><p>A token is often a whole word, sometimes part of a word, sometimes a single comma.</p>`},
+ {t:'See it happen',w:'tokenizer',b:`<p>Type a sentence. Short common words stay whole. Long or unusual words get split into reusable chunks, which is how a model copes with words it has never seen.</p>`},
+ {t:'Each token gets a number',on:['tok','ids','model'],flow:[['tok','ids'],['ids','model']],b:`<p>The model has a fixed vocabulary, usually somewhere around 50,000 to 200,000 tokens. Each has an ID number. “ cat” might be 9,246.</p><p>The model receives the list of numbers, and gives numbers back, which are turned into text for you.</p>`},
+ {t:'Why you should care',b:`<p>Tokens are the unit everything is measured in. Limits on how much a model can read are in tokens. API prices are per million tokens. Speed is tokens per second.</p><p class="key">Rule of thumb in English: 100 tokens is about 75 words.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'Why do models split rare words into several tokens?',o:['To make the text longer','So a limited vocabulary can still spell out any word','Because they cannot handle long words at all'],a:1,y:'A fixed set of pieces can be combined to cover words never seen before.'},b:`<p>One question.</p>`}]},
+{s:'predict',t:'Predicting the next word',d:'The single trick behind every chatbot answer.',g:'predict',steps:[
+ {t:'An LLM does one thing',on:['prompt','model','probs'],flow:[['prompt','model'],['model','probs']],b:`<p>Give a language model some text and it produces a score for <b class="t">every token in its vocabulary</b>: how likely each one is to come next.</p><p>It does not look anything up. It computes those probabilities from its parameters.</p>`},
+ {t:'Then it picks one',w:'nextword',b:`<p>Press “Pick a word” a few times. The likeliest word wins most often, but not always.</p><p><b class="t">Temperature</b> controls how adventurous the pick is. Low: nearly always the top choice. High: surprising, sometimes silly.</p>`},
+ {t:'And goes round again',flow:'all',b:`<p>The chosen token is added to the text, and the whole thing goes back in to choose the next one. Hundreds of loops later you have a paragraph.</p><p>That is why answers appear word by word. They are being produced word by word.</p>`},
+ {t:'Why this is more than autocomplete',on:['model'],b:`<p>To predict the next word of a physics answer well, a model has to pick up some physics. To continue a proof, some logic. Prediction at this scale forces it to learn a great deal about the world described in text.</p><p class="key">It also explains its worst habit: it produces what is <i>plausible</i>, which is not always what is <i>true</i>.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'You ask the same question twice and get two different answers. Why?',o:['The model was retrained in between','The next token is sampled from probabilities, so there is some randomness','One of the answers came from a search engine'],a:1,y:'With temperature above zero, the pick varies from run to run.'},b:`<p>One question.</p>`}]},
+{s:'training',t:'How data trains a model',d:'From a pile of text to a finished model, step by step.',g:'training',steps:[
+ {t:'Step 1: collect a mountain of text',on:['web','books','code','clean'],flow:[['web','clean'],['books','clean'],['code','clean']],b:`<p>Training data comes from public web pages, books, code, licensed archives and data written by paid contractors. Some companies also use user conversations where their terms allow it.</p><p>It is filtered first: duplicates, spam and unwanted material are removed.</p>`},
+ {t:'Step 2: hide the next word and guess',on:['clean','model','loss'],flow:[['clean','model'],['model','loss']],b:`<p>Take a sentence from the data. Show the model the start and ask for the next token. At first its dials are random, so its guess is rubbish.</p><p>The data itself supplies the right answer, so no human has to label anything. This is called <b class="t">pre-training</b>.</p>`},
+ {t:'Step 3: nudge the dials',w:'train',b:`<p>The gap between the guess and the real next word is the <b class="t">error</b> (engineers say “loss”). Maths works out which way to turn each dial to shrink it a little.</p><p>Press the button and watch “blue” rise as the error falls.</p>`},
+ {t:'Step 4: repeat trillions of times',on:['dc','model','loss'],flow:[['dc','model'],['model','loss'],['loss','model']],b:`<p>Do that across trillions of tokens, on thousands of specialised chips, for weeks or months. Grammar comes first, then facts, then style, reasoning patterns and code.</p><p>This stage costs the most money and the most electricity.</p>`},
+ {t:'What the model keeps',on:['model'],b:`<p>The finished model is a file of numbers. It is <b class="t">not a database</b> of its training text and cannot look a document up. It holds patterns, though heavily repeated passages can sometimes be reproduced.</p><p class="key">It also stops learning. Anything after its training cut-off date is unknown to it unless you tell it.</p>`},
+ {t:'Step 5: teach it to be an assistant',on:['model','raters','ft','done'],flow:[['model','ft'],['raters','ft'],['ft','done']],b:`<p>A raw pre-trained model just continues text. <b class="t">Fine-tuning</b> trains it further on example conversations so it answers questions, follows instructions and declines harmful requests.</p><p>People rate its answers, and those ratings steer more training. Then it is tested and released.</p>`},
+ {t:'Does chatting train it?',on:['done'],b:`<p>Not live. Your conversation does not change the model while you talk. The weights are frozen once released.</p><p>Whether your chats are <i>saved and used in a future training run</i> is a policy question that depends on the product and your settings. The chapters on versions and on companies cover that.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'During pre-training, where does the “right answer” come from?',o:['A person labels every sentence','The actual next word in the training text','The model asks a search engine'],a:1,y:'The text supplies its own answers, which is why it scales to trillions of words.'},b:`<p>One question.</p>`}]},
+{s:'modern',t:'How new models are trained now',d:'The 2026 recipe: pre-training, then a lot of practice with a checker.',g:'modern',steps:[
+ {t:'Three stages, not one',flow:'all',b:`<p>The last chapter showed the basic idea. Today’s frontier models go through three stages: <b class="t">pre-training</b> on a huge pile of text, <b class="t">mid-training</b> on a carefully chosen diet, then <b class="t">post-training</b> that turns it into a useful, safe assistant.</p><p>A few years ago post-training was a light finish. Now it takes a large share of the effort and computing power.</p>`},
+ {t:'Pre-training: still the foundation',on:['dc','pre'],flow:[['dc','pre']],b:`<p>Next-word prediction over trillions of tokens is still where general knowledge and language come from. The runs use tens or hundreds of thousands of chips.</p><p>The catch: good human-written text is running short. So labs filter harder, license more books and archives, and add <b class="t">synthetic data</b> written by earlier models and then checked.</p>`},
+ {t:'Mid-training: a focused diet',on:['pre','mid'],flow:[['pre','mid']],b:`<p>Towards the end of pre-training the mix shifts to high-quality material: code, maths, science, long documents and many languages.</p><p>This is also where models learn to handle very long inputs, the large context windows from earlier.</p>`},
+ {t:'Example answers',on:['mid','sft'],flow:[['mid','sft']],b:`<p>Next the model is shown thousands of ideal conversations, written by people or by earlier models and reviewed. It learns the shape of a good answer: follow the instructions, use the right tone, ask when unclear.</p><p>Engineers call this supervised fine-tuning.</p>`},
+ {t:'Values and feedback',on:['raters','val','rl'],flow:[['raters','val'],['val','rl']],b:`<p>People, and AI judges guided by written principles, compare pairs of answers and say which is better. The model is trained towards the preferred ones.</p><p>Anthropic writes Claude’s principles into a public <b class="t">constitution</b>, rewritten in January 2026, which explains not only what to value but why. It is used directly in training.</p>`},
+ {t:'Practice with a checker',w:'rlsim',b:`<p>The biggest change since 2024 is <b class="t">reinforcement learning with checkable answers</b>. The model gets a task whose result can be verified automatically, like a maths problem with a known answer or code with tests. It tries many times. Attempts that pass are reinforced.</p><p>Run a few rounds and watch real skill climb. Step-by-step reasoning grows out of this kind of practice.</p>`},
+ {t:'Practice worlds for agents',on:['rl','check'],flow:[['rl','check']],b:`<p>To train agents, labs build <b class="t">environments</b>: sandboxed computers, codebases, browsers and spreadsheets with a goal and a way to score the result. “Fix this bug so the tests pass.” “Book the cheapest flight that meets these rules.”</p><p>Building thousands of good environments is now an industry of its own.</p>`},
+ {t:'When the checker is sloppy',w:'rlsim',sloppy:1,b:`<p>The model only learns what the checker rewards. If the checker can be fooled, the model may learn to fool it. This is <b class="t">reward hacking</b>, and it is a real problem in frontier training, not a thought experiment.</p><p>This version starts with a sloppy checker. Run some rounds and compare the two bars.</p>`},
+ {t:'Testing, then smaller copies',on:['eval','rel'],flow:[['rl','eval'],['eval','rel']],b:`<p>Before release the model goes through safety testing (next chapters). The large model is also used to teach smaller, cheaper ones, which is <b class="t">distillation</b>.</p><p>Then the weights are frozen and released as a version. Further learning happens only in the next training run.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'What is reward hacking?',o:['Stealing a model’s weights','A model learning to fool the checker instead of doing the task properly','Paying people to rate answers'],a:1,y:'The model optimises what is measured, so the measurement has to be right.'},b:`<p>One question.</p>`}]},
+{s:'meaning',t:'Meaning and attention',d:'How a model knows that “bank” can be a river or a loan.',g:'tokens',steps:[
+ {t:'Words become coordinates',w:'embed',b:`<p>Each token is turned into a long list of numbers called an <b class="t">embedding</b>. Think of it as a position on a map where similar meanings sit close together.</p><p>Tap a word to find its neighbours.</p>`},
+ {t:'Context changes meaning',w:'attention',b:`<p>A word’s meaning depends on its neighbours. <b class="t">Attention</b> lets every token look at every other token and decide which ones matter for understanding it.</p><p>Switch the ending and watch “it” change its mind.</p>`},
+ {t:'The transformer',on:['ids','model'],flow:[['ids','model']],b:`<p>Stack dozens of attention layers and you have a <b class="t">transformer</b>, the design from 2017 that every major LLM uses. The T in GPT stands for it.</p><p>Its advantage: it processes all tokens at once, so it trains efficiently on enormous amounts of text.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'What does attention do?',o:['Stores the conversation on disk','Lets each word weigh the other words to work out its meaning in context','Checks facts against the internet'],a:1,y:'It is how “it” gets linked to the right noun.'},b:`<p>One question.</p>`}]},
+{s:'context',t:'The context window',d:'Why a chatbot forgets, and what “memory” really is.',g:'context',steps:[
+ {t:'The model has no memory',on:['msg','win','model','out'],flow:[['msg','win'],['win','model'],['model','out']],b:`<p>A model answers from two things only: its frozen parameters, and the text in front of it right now. That text is the <b class="t">context window</b>.</p><p>Between one request and the next it remembers nothing.</p>`},
+ {t:'So the whole chat is re-sent',flow:'all',b:`<p>Each time you press send, the app quietly sends everything again: hidden instructions from the app maker, the full conversation so far, any files, then your new message.</p><p>The model reads it all from the top, every time.</p>`},
+ {t:'The window has a size',w:'context',b:`<p>Windows are measured in tokens. Modern ones hold hundreds of thousands, a few hold a million or more. This toy one holds 1,000 so you can fill it.</p><p>Keep sending and watch what happens to the oldest messages.</p>`},
+ {t:'What “memory” features do',on:['sys','hist','win'],flow:[['sys','win'],['hist','win']],b:`<p>When an app remembers you across chats, the model has not changed. The app saved some notes about you and <b class="t">pastes them back into the window</b> at the start of the next chat.</p><p class="key">Everything a model knows about you is either in the window or it is not known.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'In a very long chat the assistant forgets something from the start. The likeliest reason?',o:['It got tired','The early text no longer fits in the context window','It was retrained mid-chat'],a:1,y:'Once text falls outside the window the model cannot see it.'},b:`<p>One question.</p>`}]},
+{s:'rag',t:'RAG: giving a model your documents',d:'Retrieval-augmented generation without the jargon.',g:'rag',steps:[
+ {t:'The problem',on:['q','model'],flow:[['q','model']],b:`<p>A model knows what was in its training data up to its cut-off date. It has never seen your company handbook, last week’s sales figures or your inbox.</p><p>Ask anyway and it may produce a confident guess.</p>`},
+ {t:'Step 1: index the documents once',on:['docs','store'],flow:[['docs','store']],b:`<p>Your documents are cut into short <b class="t">chunks</b>, a paragraph or so each. Every chunk is turned into an embedding, its coordinates on the map of meaning, and stored in a search index (often called a vector database).</p>`},
+ {t:'Step 2: retrieve at question time',on:['q','store','find'],flow:[['q','find'],['store','find']],b:`<p>When a question arrives it is embedded too. The index returns the chunks whose coordinates are closest, meaning the passages most likely to be relevant, even if they use different words.</p>`},
+ {t:'Step 3: put them in the prompt',on:['find','model','ans'],flow:[['find','model'],['model','ans']],b:`<p>Those chunks are pasted into the context window above the question, with an instruction like “answer using only these sources”. The model then writes an answer and can point to where each fact came from.</p><p class="key">Retrieval + Augmenting the prompt + Generation = RAG.</p>`},
+ {t:'Try it',w:'rag',b:`<p>Pick a question. See which chunks score highest, and how the answer cites them.</p><p>The model has learned nothing. It read two paragraphs just before answering.</p>`},
+ {t:'RAG or fine-tuning?',flow:'all',b:`<p><b>RAG</b> hands the model facts at question time. Update a document and the next answer changes. Access can follow each person’s permissions.</p><p><b>Fine-tuning</b> changes the dials. It is better for teaching a style or a skill than for facts that keep changing.</p><p>Most company “chat with our documents” tools are RAG.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'In RAG, how does the model “know” your company policy?',o:['It was retrained on the policy','The relevant passage was fetched and placed in its context window','It memorised it from an earlier chat'],a:1,y:'The knowledge lives in the documents, not in the model.'},b:`<p>One question.</p>`}]},
+{s:'agents',t:'Tools and agents',d:'How a text predictor ends up searching, coding and clicking.',g:'agents',steps:[
+ {t:'A model can only write text',on:['user','model'],flow:[['user','model']],b:`<p>On its own an LLM cannot browse, calculate reliably, send an email or check today’s date. All it can do is produce tokens.</p>`},
+ {t:'So it writes a request',on:['model','search'],flow:[['model','search']],b:`<p>The app tells the model which <b class="t">tools</b> exist. When the model decides it needs one, it writes a small structured note, such as “search the web for: train times London to Leeds”.</p><p>The app, not the model, runs the search and pastes the results back into the window.</p>`},
+ {t:'Loop that and you have an agent',flow:'all',b:`<p>An <b class="t">agent</b> is a model working in a loop: decide a step, call a tool, read the result, decide the next step, until the job is done.</p><p>That is how AI can now fix a bug across many files or research a topic over dozens of pages.</p>`},
+ {t:'Connectors',on:['model','apps'],flow:[['model','apps']],b:`<p>Connectors plug a model into your email, calendar, files or company systems. A shared standard called the Model Context Protocol (MCP) means one connector works across many AI apps.</p>`},
+ {t:'The new risks',on:['apps','search'],b:`<p>An agent that can act can act wrongly. Two things to know:</p><p><b>Permissions.</b> It should have only the access the task needs, and ask before anything irreversible.</p><p><b>Prompt injection.</b> A web page or email can contain text written to hijack the agent. Good systems treat what they read as information, never as orders.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'When a chatbot “searches the web”, what actually runs the search?',o:['The neural network itself','The app around the model, after the model asks for it','Nobody, the answer is invented'],a:1,y:'The model writes the request; ordinary software carries it out.'},b:`<p>One question.</p>`}]},
+{s:'api',t:'APIs and MCP',d:'How apps talk to a model, and how a model reaches your tools.',g:'api',steps:[
+ {t:'The chat app is only one door',on:['app','api','model'],flow:[['app','api'],['api','model']],b:`<p>When a bank’s website, a coding tool or a customer-service bot “has AI in it”, it is usually not running its own model. It is calling someone else’s over the internet through an <b class="t">API</b>.</p><p>API means application programming interface: a fixed way for one program to ask another for something.</p>`},
+ {t:'What a request looks like',w:'apireq',b:`<p>The app sends a small structured message and gets the model’s reply back as data. Flip between the three versions.</p><p>Notice there is no memory here either. The app sends the whole conversation each time.</p>`},
+ {t:'The key and the meter',on:['api','meter'],flow:[['api','meter']],b:`<p>Each request carries an <b class="t">API key</b>, a long secret password that identifies the customer. Leak it and someone else can spend your money.</p><p>The provider counts tokens in and tokens out, and bills for both.</p>`},
+ {t:'Price up a request',w:'bill',b:`<p>Output tokens usually cost several times more than input tokens, because writing takes more computing than reading.</p><p>Drag the sliders. One request is tiny. Volume is what makes the bill.</p>`},
+ {t:'MCP: a standard plug for tools',on:['model','mcp','tool'],flow:[['model','mcp'],['mcp','tool']],b:`<p>The API connects an app to a model. <b class="t">MCP</b>, the Model Context Protocol, connects a model to everything else: files, calendars, databases, company systems.</p><p>Think of it as USB for AI. Before it, every app needed a custom connection to every tool.</p>`},
+ {t:'How an MCP server works',on:['mcp','tool'],flow:[['mcp','tool']],b:`<p>An MCP <b>server</b> is a small program that sits in front of a tool and announces: here is what I can do, and here is how to ask. For a calendar: list events, create event, find a free slot.</p><p>Any AI app that speaks MCP can plug in and use it without new code. One server, many apps.</p>`},
+ {t:'API or MCP?',flow:'all',b:`<p class="key">API: how software reaches the model. MCP: how the model reaches software.</p><p>They work together. A company app calls the model by API, and the model uses MCP connectors to read the company’s data, with whatever permissions the admin allowed.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'What does MCP standardise?',o:['How models are trained','How a model connects to outside tools and data','How much a token costs'],a:1,y:'Build a connector once and any MCP-aware app can use it.'},b:`<p>One question.</p>`}]},
+{s:'models',t:'How LLMs differ',d:'Big and small, open and closed, thinking and multimodal.',g:'llms',steps:[
+ {t:'Same recipe, different sizes',on:['small','mid','big'],b:`<p>Nearly all LLMs share the transformer design. They differ in size, training data, the fine-tuning that shapes their behaviour, and the tools built around them.</p><p>Most makers sell a family: a small fast model, a mid one, a large one.</p>`},
+ {t:'Size is a trade-off',w:'size',b:`<p>More parameters usually means more capable, and also slower and more expensive per answer. Slide to compare.</p><p class="key">The biggest model is the wrong choice for most routine jobs.</p>`},
+ {t:'Closed or open',on:['open','closed'],b:`<p><b class="t">Closed</b> models (Claude, GPT, Gemini) stay on the maker’s servers. You rent access through an app or API.</p><p><b class="t">Open-weight</b> models (Llama, Mistral, DeepSeek, Qwen and others) can be downloaded and run on your own machines. More control and privacy, more engineering work, and usually a step behind the very best.</p>`},
+ {t:'Thinking modes',on:['big'],b:`<p>Many current models can <b class="t">reason before answering</b>: they write out working in a scratchpad, check it, then reply. Better on maths, planning and code. Slower, and it uses more tokens and energy.</p>`},
+ {t:'More than text',on:['mid','big'],b:`<p><b class="t">Multimodal</b> models accept images, audio or video as well as text, by turning those into tokens too. Image and video <i>generators</i> are usually a different kind of model, called diffusion, which starts from noise and refines it into a picture.</p>`},
+ {t:'How to choose',b:`<p>Ignore the league tables at first. Ask four things. How hard is the task? How fast must it answer? What can it cost per use? Where is the data allowed to go?</p><p>Then test two or three models on your own real examples.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'A company must keep all data on its own servers. Which kind of model fits best?',o:['An open-weight model it runs itself','Any consumer chatbot app','The largest closed model available'],a:0,y:'Open weights can run entirely inside the company’s own hardware.'},b:`<p>One question.</p>`}]},
+{s:'prices',t:'Why tokens keep getting cheaper',d:'New models arrive, old quality gets cheap, and bills still grow.',g:'prices',steps:[
+ {t:'The price of the same quality collapses',w:'deflate',b:`<p>Hold the quality fixed and watch the price. Venture firm a16z measured about a tenfold fall every year. Research group Epoch AI found between 9× and 900× a year depending on the task.</p><p>Few technologies have ever become cheap this quickly.</p>`},
+ {t:'Reason 1: better chips',on:['chips','price'],flow:[['chips','price']],b:`<p>Each generation of AI chips does more arithmetic per watt and per dollar. The same data centre can answer more prompts, so each one costs less to serve.</p>`},
+ {t:'Reason 2: smaller models catch up',on:['small','price'],flow:[['small','price']],b:`<p>This is the big one. Engineers learn to pack last year’s ability into a much smaller model, partly by having a large model teach a small one (<b class="t">distillation</b>).</p><p class="key">Last year’s flagship quality becomes this year’s budget tier.</p>`},
+ {t:'Reason 3: smarter software',on:['soft','price'],flow:[['soft','price']],b:`<p>Tricks in how models are run: storing numbers at lower precision, answering many users in one batch, and <b class="t">caching</b>, where a long prompt that repeats is processed once and reused at a discount.</p><p>Plus plain competition. Many providers, and open models anyone can host, push prices toward cost.</p>`},
+ {t:'What happens to the old model',on:['price'],b:`<p>When a new model launches, the old one usually goes one of three ways. Its price is cut. Or a newer, smaller model matches it for less, so people switch. Or it is <b class="t">retired</b> on an announced date and switched off.</p><p>Old models are rarely kept for ever, because the chips they occupy are needed for new ones.</p>`},
+ {t:'Why bills still go up',on:['price','use'],flow:[['price','use']],b:`<p>Two catches. The <b>newest, best</b> models are not cheap. They launch at premium prices, and some cost more than what they replace.</p><p>And modern use burns far more tokens: thinking modes, long documents, agents that loop for an hour. Price per token falls while tokens per task climbs.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'A new flagship model launches. What usually happens to the quality level of the previous one?',o:['It becomes more expensive because it is rare','It becomes available more cheaply, often in a smaller model','It keeps improving by itself'],a:1,y:'Yesterday’s top tier becomes today’s budget option.'},b:`<p>One question.</p>`}]},
+{s:'versions',t:'Versions, updates and your data',d:'Does a released model keep learning? Does the next one learn from you?',g:'versions',steps:[
+ {t:'A version is a snapshot',on:['d1','v1'],flow:[['d1','v1']],b:`<p>Once a model is released, its training has stopped. The weights are frozen. A name like “Opus 5.5” points at one fixed file of numbers.</p><p>It does not get smarter week by week, and it does not learn from the people using it.</p>`},
+ {t:'So why does it seem to change?',on:['v1','you'],flow:[['v1','you']],b:`<p>The product around the model changes. The hidden instructions get edited, new tools and search are added, safety filters are tuned.</p><p>Same engine, different car. And because answers are sampled, two identical questions can differ anyway.</p>`},
+ {t:'The next version is a new training run',on:['d2','v2'],flow:[['d2','v2']],b:`<p>A new version is not the old one topped up with fresh facts. It is trained again, often from scratch or from an earlier stage, with more data, a later cut-off date and improved methods.</p><p>Then it is tested and released as a new frozen snapshot. The old one carries on unchanged until it is retired.</p>`},
+ {t:'Your question: I told 5.5 something. Does the next Opus know it?',w:'mydata',b:`<p><b>Not automatically.</b> What you type sits in the context window for that chat and is gone from the model’s view afterwards. Nothing flows from your chat into the weights.</p><p>The only route is the slow one: your chat is saved, the rules allow it to be used, and it becomes one example among billions in a later training run. Pick your situation.</p>`},
+ {t:'Even then, it does not “know you”',on:['you','store','d2'],flow:[['you','store'],['store','d2']],b:`<p>If a chat is used in training, the new model does not receive a file about you. It is nudged by your text the same way it is nudged by any page, a tiny amount, toward general patterns.</p><p class="key">It would not recall your project or your name the way a person would. Rare, repeated or unusual text is the exception, which is why secrets should stay out regardless.</p>`},
+ {t:'What this means in practice',flow:'all',b:`<p>A new version will not remember your old conversations. Bring your context with you: documents, instructions, or a memory feature that pastes notes back in.</p><p>If you do not want your chats used, turn the setting off or use a work plan. If you already shared something you regret, delete that chat.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'You explain your business to a model today. A new version launches next year. Does it know your business?',o:['Yes, models update themselves from every chat','No, unless that chat was saved and used in training, and even then only as faint general patterns','Yes, but only if you used the same account'],a:1,y:'Released models are frozen, and future training is governed by data settings.'},b:`<p>One question.</p>`}]},
+{s:'enterprise',t:'Claude inside a big company',d:'What “private” AI means when a business rolls it out.',g:'ent',steps:[
+ {t:'The worry',on:['emp','claude','train'],flow:[['emp','claude']],b:`<p>A bank wants its staff to use Claude. The fear is simple: will our contracts and customer data be stored somewhere we cannot see, or end up teaching a model that our competitors also use?</p>`},
+ {t:'Same model, different contract',w:'privacy',b:`<p>There is no separate “private Claude” brain. The company gets the same model under <b class="t">commercial terms</b> with different data rules and controls.</p><p>Compare the three ways in.</p>`},
+ {t:'Not used for training',on:['claude','train'],b:`<p>This is the core promise. On Anthropic’s commercial products, prompts and replies are not used to train models by default. A company would have to opt in.</p><p class="key">The model that answers on Friday is the same frozen model as on Monday. It did not learn the bank’s secrets in between.</p>`},
+ {t:'Getting in: the company login',on:['emp','admin','sso','ws'],flow:[['emp','sso'],['sso','ws'],['admin','ws']],b:`<p>Staff sign in with their normal work account (single sign-on). When someone leaves, their access ends with their work account. Admins decide who gets in, which features are on and which tools are allowed.</p>`},
+ {t:'Using company knowledge',on:['ws','data','claude'],flow:[['ws','data'],['ws','claude']],b:`<p>Connectors link Claude to the company’s documents, chat and databases. This is the RAG and tools pattern from earlier: relevant material is fetched <b class="t">at question time</b> and placed in the context window.</p><p>It respects each person’s existing permissions, so an intern cannot ask their way into board papers.</p>`},
+ {t:'Where it runs',on:['ws','claude'],flow:[['ws','claude']],b:`<p>Two routes. Directly with Anthropic, through Claude’s apps or API. Or through a cloud the company already uses: Amazon Bedrock, Google Cloud or Microsoft Foundry, where requests are handled inside that provider’s environment under its own data terms.</p><p>Banks and hospitals often pick the second because their security reviews already cover that cloud.</p>`},
+ {t:'What is kept, and who can see it',on:['ws','logs'],flow:[['ws','logs']],b:`<p>Commercial API data is typically deleted within 30 days. Enterprise plans let admins set retention. Approved customers can have <b class="t">zero data retention</b>, where prompts are not stored after the reply, apart from what law or misuse prevention requires.</p><p>Audit logs record who did what, which regulators and security teams expect.</p>`},
+ {t:'What still goes wrong',on:['emp'],b:`<p>The contract does not fix everything. Staff paste confidential text into personal accounts. Connectors are given broader access than they need. People trust an answer nobody checked.</p><p>“Private” describes where data goes. It does not make the answers correct.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'A company connects Claude to its document store. How does Claude use those documents?',o:['It is retrained on them overnight','Relevant passages are fetched when someone asks, and read in the context window','They are added to the public model'],a:1,y:'Retrieval at question time, not learning.'},b:`<p>One question.</p>`}]},
+{s:'energy',t:'Energy',d:'Where the electricity goes, and how much a prompt really uses.',g:'energy',steps:[
+ {t:'Where the power goes',on:['grid','dc','cool'],flow:[['grid','dc'],['dc','cool']],b:`<p>AI runs in data centres packed with specialised chips (GPUs). Each chip does billions of multiplications a second and turns almost all its electricity into heat.</p><p>So energy is spent twice: running the chips, then cooling them, which often uses water too.</p>`},
+ {t:'Training: one enormous burst',on:['dc','train'],flow:[['dc','train']],b:`<p>Training a frontier model keeps thousands of chips busy for weeks or months. Estimates for a single run reach into gigawatt-hours, the yearly electricity of hundreds or thousands of homes.</p><p>It happens once per model, though failed experiments along the way add more.</p>`},
+ {t:'Answering: tiny, times billions',on:['dc','serve','you'],flow:[['dc','serve'],['serve','you']],b:`<p>Each answer is small. Google measured its median Gemini text prompt at <b class="t">0.24 watt-hours</b>, about nine seconds of television. But there are billions of prompts a day, so answering now outweighs training in total.</p>`},
+ {t:'Work out your own',w:'energy',b:`<p>Move the slider. For ordinary text questions, personal use is small next to a kettle or a car journey.</p><p>The picture changes with long reasoning tasks, agents that run for hours, and image or video generation.</p>`},
+ {t:'The big picture',on:['grid','dc'],flow:[['grid','dc']],b:`<p>The International Energy Agency put all data centres at about 415 TWh in 2024, roughly 1.5% of the world’s electricity, and projects around 945 TWh by 2030, with AI the main driver.</p><p class="key">The strain is local. One large site can need as much power as a city, in a place whose grid was not built for it.</p>`},
+ {t:'What brings it down',flow:'all',b:`<p>Better chips, smaller models for simple jobs, reusing repeated work (caching), and cleaner electricity. Google reported the energy per Gemini prompt fell 33-fold in one year.</p><p>Efficiency per prompt is improving fast. Total demand is still rising because usage grows faster.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'Which uses more energy in total today?',o:['A single training run','Answering billions of everyday prompts','Tokenising text'],a:1,y:'Each prompt is tiny, but the volume is enormous.'},b:`<p>One question.</p>`}]},
+{s:'limits',t:'Where it goes wrong',d:'Five failure modes worth knowing before you rely on it.',g:'limits',steps:[
+ {t:'It makes things up',on:['model','ans'],flow:[['model','ans']],b:`<p>A model generates what is plausible. When it lacks the fact, it can produce a fluent, confident and wrong answer, including fake quotes and references. This is called <b class="t">hallucination</b>.</p><p>It is less common than it was, and it has not gone away.</p>`},
+ {t:'It is stuck in the past',on:['q','model'],b:`<p>Without search or documents, a model knows nothing after its training cut-off, and may not realise that time has moved on. Ask about anything recent only when it can look things up.</p>`},
+ {t:'It inherits bias',on:['model'],b:`<p>Training text was written by people, with their blind spots and stereotypes. Models absorb some of that. Makers work to reduce it, and it still shows up in subtle ways.</p>`},
+ {t:'It can be steered',on:['q','model'],flow:[['q','model']],b:`<p>Wording matters. Leading questions get agreeable answers. Text hidden in a document can try to redirect an agent. A model is not a neutral oracle.</p>`},
+ {t:'Your part',flow:'all',b:`<p class="key">Treat it as a quick, well-read colleague who is sometimes wrong and never tells you when.</p><p>Ask for sources and open them. Check numbers. Be most careful with medical, legal and financial questions. Keep a person responsible for the outcome.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'A model gives you a confident answer with a citation. What should you do?',o:['Trust it, citations are always real','Open the source and confirm it says that','Ask the same question again and trust the second answer'],a:1,y:'Citations can be invented or misread, so the source is the check.'},b:`<p>One question.</p>`}]},
+{s:'risks',t:'Risks',d:'The wider risks of AI, and what you can do about each.',g:'risks',steps:[
+ {t:'Two kinds of risk',on:['tech','people','soc'],flow:[['tech','people'],['tech','soc']],b:`<p>The last chapter covered a model getting things wrong. This one is about what happens when it works well, in the wrong hands or at the wrong scale.</p><p>Some risks land on you personally. Others fall on society as a whole.</p>`},
+ {t:'Explore them',w:'risklist',b:`<p>Seven that come up most. For each: what it is and what reduces it.</p>`},
+ {t:'Who is responsible',on:['people','soc','guard'],flow:[['people','guard'],['soc','guard']],b:`<p><b>Makers</b> test models before release, block clearly harmful uses and watch for abuse. <b>Companies</b> deploying AI decide what it can access and who checks its work. <b>Governments</b> are writing rules, such as the EU’s AI Act, which sets duties by level of risk.</p><p>None of the three is enough alone.</p>`},
+ {t:'A sensible attitude',flow:'all',b:`<p>Neither panic nor blind trust. Most everyday use is low-stakes and helpful. Risk rises with three things: how much the system can <b>do</b>, how much it can <b>access</b>, and how little anyone <b>checks</b>.</p><p class="key">Raise oversight as you raise autonomy.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'You are setting up an AI agent to tidy your inbox. Which setup is safest?',o:['Full access to email, files and payments, no approvals','Access to email only, with approval before sending or deleting','No difference, agents cannot make mistakes'],a:1,y:'Least access plus approval for irreversible actions.'},b:`<p>One question.</p>`}]},
+{s:'safety',t:'Safety: what companies do',d:'The layers between a powerful model and harm, and what you can do yourself.',g:'safety',steps:[
+ {t:'Why companies bother',flow:'all',b:`<p>A model that can help a researcher design a vaccine can, in principle, help someone else do harm. A model that finds software bugs for defenders can find them for attackers. The capability is the same; the use differs.</p><p>So companies put several layers between the model and the world. Laws now require some of this, and customers ask for it.</p>`},
+ {t:'Layer 1: clean the data',on:['data','train'],flow:[['data','train']],b:`<p>Before training, the riskiest material, such as detailed weapons information, is filtered out of the data, along with spam, abuse imagery and large amounts of personal information.</p><p>A model cannot easily repeat what it never saw.</p>`},
+ {t:'Layer 2: train good values',on:['train','model'],flow:[['train','model']],b:`<p>Post-training teaches the model to refuse clearly harmful requests, be honest about uncertainty and handle sensitive topics with care.</p><p>Claude’s constitution sets out priorities in order: be broadly safe, meaning do not undermine human oversight; be ethical; follow Anthropic’s guidelines; and be genuinely helpful.</p>`},
+ {t:'Layer 3: test for danger',on:['model','eval','ext'],flow:[['model','eval'],['ext','eval']],b:`<p>Before release, teams try to make the model misbehave. This is <b class="t">red-teaming</b>. They also run dangerous-capability tests: can it meaningfully help with biological weapons, serious cyberattacks, or copying itself out of its servers?</p><p>Government testers such as the UK AI Security Institute and the US CAISI test models too. Results go in a public <b class="t">system card</b>.</p>`},
+ {t:'Layer 4: if-then rules',on:['eval','model'],b:`<p>Leading labs publish frameworks of the form: <i>if a model reaches capability X, we must have safeguards Y before releasing it.</i></p><p>Anthropic calls its version the Responsible Scaling Policy, with AI Safety Levels. OpenAI has a Preparedness Framework and Google DeepMind a Frontier Safety Framework. The strongest models may go only to vetted partners at first.</p>`},
+ {t:'Layer 5: guard the live model',on:['model','guard','user','sec'],flow:[['model','guard'],['guard','user'],['model','sec']],b:`<p>After release: classifiers that screen for the most dangerous requests, usage policies, monitoring for abuse, and banning accounts that misuse the model. This is one reason commercial data is kept for a short period.</p><p>Behind it all, the weights file is locked down so it cannot be stolen and stripped of these protections.</p>`},
+ {t:'What each layer is for',w:'safetymap',b:`<p>Pick a worry to see the matching safeguards, and why each one is hard to get right.</p>`},
+ {t:'The honest limits',on:['model'],b:`<p>Most of these commitments are voluntary, and companies race each other. Tests can miss things. Clever prompts, called <b class="t">jailbreaks</b>, still get past safeguards sometimes. Open-weight models, once published, cannot be recalled or patched.</p><p class="key">This is why outside testing, transparency reports and laws matter: they check the checkers.</p>`},
+ {t:'What you should think about',w:'checklist',b:`<p>Company safeguards cover the model. You cover how it is used. Tick off what you already do.</p><p>The organisation list is a good starting point for a workplace AI policy.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'What is a “system card”?',o:['A payment card for AI subscriptions','A public report of a model’s safety tests and their results','The chip a model runs on'],a:1,y:'It is published at release so outsiders can see what was tested.'},b:`<p>One question.</p>`}]},
+{s:'laws',t:'AI laws: now and next',d:'What is in force, what is coming, and links to read them.',g:'laws',steps:[
+ {t:'Why laws, and why now',flow:'all',b:`<p>For years AI was governed mostly by companies’ own promises. Since 2024, governments have moved: some to protect people, some to stay competitive, many to do both.</p><p>Three regions matter most for you: the EU, the US and Asia. The UK is still deciding.</p>`},
+ {t:'The EU: rules by level of risk',on:['eu'],w:'eutiers',b:`<p>The <b class="t">EU AI Act</b> is the world’s most comprehensive AI law. It does not regulate “AI” in general. It sorts uses by risk, and stricter rules apply higher up.</p><p>It applies to anyone offering AI to people in the EU, wherever the company is based. Tap each level.</p>`},
+ {t:'The US: states first, Washington pushing back',on:['states','fed'],b:`<p>There is no broad federal AI law. States moved first. California’s SB 53, in force since January 2026, makes the biggest developers publish safety frameworks and report serious incidents. New York’s RAISE Act follows in January 2027.</p><p>The White House wants one national standard that would override most state rules and has asked Congress to write it. Several bills are drafted; none has passed. Federal law does already cover sexual deepfakes, through the TAKE IT DOWN Act.</p>`},
+ {t:'The UK and Asia',on:['uk','asia'],b:`<p><b>UK:</b> no dedicated AI law. The government relies on existing regulators and its AI Security Institute, which tests models.</p><p><b>South Korea</b> brought in a full AI law in January 2026. <b>China</b> requires labels on all AI-generated content. <b>Japan</b> passed a lighter law that promotes AI without fines.</p>`},
+ {t:'Every law, with links',w:'laws',b:`<p>The full list in date order. The dashed line marks today. Filter by region, and open any law to read it.</p>`},
+ {t:'What this means for you',on:['co'],b:`<p>As a user in Europe you now have a right to know when you are talking to a chatbot, and to see deepfakes labelled. In the US you can demand removal of intimate deepfakes within 48 hours.</p><p>At work: if AI helps decide who gets hired, a loan or a school place, expect more checks, records and human review from 2027. And every organisation using AI in the EU should already be training its staff.</p>`},
+ {t:'Check yourself',w:'quiz',q:{q:'Under the EU AI Act, which rule already applies to a customer-service chatbot today?',o:['It must be registered as high-risk','It must tell people they are talking to AI','It is banned'],a:1,y:'Transparency duties have applied since 2 August 2026.'},b:`<p>Last question. You have reached the end of the guide.</p>`}]}
+];
+
+/* ---------- app ---------- */
+const app=$('#app');
+let seen={};try{seen=JSON.parse(localStorage.getItem('haw-seen')||'{}')}catch(e){}
+const save=()=>{try{localStorage.setItem('haw-seen',JSON.stringify(seen))}catch(e){}};
+function route(){
+  const m=location.hash.slice(1).match(/^([a-z]+)(?:-(\d+))?$/);
+  const ci=m?CH.findIndex(c=>c.s===m[1]):-1;
+  if(ci<0){home();return}
+  lesson(ci,Math.min(Math.max(+(m[2]||1),1),CH[ci].steps.length));
+}
+const CI={basics:'llm',neurons:'gear',tokens:'tokens',predict:'dice',training:'book',modern:'check',meaning:'globe',context:'window',rag:'search',agents:'terminal',api:'plug',models:'chart',prices:'coin',versions:'calendar',enterprise:'co',energy:'bolt',limits:'alert',risks:'people',safety:'shield',laws:'gov'};
+function home(){
+  $('#crumb').textContent=CH.length+' chapters, one diagram at a time';
+  const total=CH.reduce((a,c)=>a+c.steps.length,0),done=CH.reduce((a,c)=>a+Math.min(seen[c.s]||0,c.steps.length),0);
+  const next=CH.find(c=>(seen[c.s]||0)<c.steps.length)||CH[0];
+  app.innerHTML=`<section class="hero"><div><p class="eyebrow">An interactive guide for complete beginners</p>
+   <h1>How <em>AI</em> actually works</h1>
+   <p>Chatbots, training data, RAG, private company setups and the electricity bill. Each idea is one diagram and a few plain sentences. Step through, and poke the parts that move.</p>
+   <a class="btn primary" href="#${next.s}-${Math.min((seen[next.s]||0)+1,next.steps.length)}">${done?'Continue: '+next.t:'Start at chapter 1'}</a>
+   <p class="eyebrow" style="margin-top:18px">${done} of ${total} steps done</p></div>
+   <div class="stage" style="position:static">${diagram('training',{flow:'all'})}</div></section>
+   <h2 class="sec">Chapters</h2>
+   <div class="grid">${CH.map((c,i)=>`<a class="chap" href="#${c.s}-1"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><g class="ic">${ICONS[CI[c.s]]||ICONS.llm}</g></svg><span class="num">${String(i+1).padStart(2,'0')} · ${c.steps.length} steps</span><h3>${c.t}</h3><p>${c.d}</p><div class="bar"><i style="width:${Math.min((seen[c.s]||0)/c.steps.length,1)*100}%"></i></div></a>`).join('')}</div>
+   <footer>Figures: energy per prompt from Google’s August 2025 measurement of Gemini; data-centre totals from the International Energy Agency’s 2025 Energy and AI report; Claude data handling from Anthropic’s published commercial terms, consumer terms update (August 2025) and privacy pages; price trends from a16z (2024) and Epoch AI (2025); training methods from Anthropic’s published constitution and industry reporting; laws as listed in the Laws chapter, checked 25 November 2026. Interactive demos are simplified models of the real thing and say so where it matters. Visits are counted with GoatCounter, which uses no cookies and collects no personal data.</footer>`;
+  window.scrollTo(0,0);
+}
+function lesson(ci,n){
+  const c=CH[ci],st=c.steps[n-1];
+  seen[c.s]=Math.max(seen[c.s]||0,n);save();
+  $('#crumb').textContent=`${String(ci+1).padStart(2,'0')} ${c.t} · step ${n} of ${c.steps.length}`;
+  const prev=n>1?`#${c.s}-${n-1}`:ci>0?`#${CH[ci-1].s}-${CH[ci-1].steps.length}`:'#';
+  const last=n===c.steps.length,nx=!last?`#${c.s}-${n+1}`:ci<CH.length-1?`#${CH[ci+1].s}-1`:'#';
+  const hasDiagram=!st.w||st.on||st.flow;
+  app.innerHTML=`<section class="lesson">
+   <div class="stage" id="stage">${st.w&&!hasDiagram?'':diagram(c.g,st)}<div id="widget"></div></div>
+   <div class="copy"><p class="eyebrow">Chapter ${ci+1} · ${c.t}</p><h1>${st.t}</h1>${st.b}</div></section>
+   <nav class="rail" aria-label="Steps"><div class="wrap">
+    <a class="btn small" href="${prev}" id="prev">Back</a>
+    <div class="dots">${c.steps.map((s,i)=>`<a href="#${c.s}-${i+1}" class="${i+1===n?'on':i<(seen[c.s]||0)?'seen':''}" aria-label="Step ${i+1}: ${s.t}"></a>`).join('')}</div>
+    <a class="btn small primary" href="${nx}" id="next">${!last?'Next':ci<CH.length-1?'Next chapter':'Finish'}</a></div></nav>`;
+  if(st.w){
+    const host=$('#widget');
+    if(hasDiagram){ // widget sits under the text instead, diagram keeps the stage
+      const d=document.createElement('div');$('.copy').appendChild(d);W[st.w](d,st);
+    }else W[st.w](host,st);
+  }
+  window.scrollTo(0,0);
+}
+addEventListener('hashchange',route);
+addEventListener('keydown',e=>{
+  if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+  const b=e.key==='ArrowRight'?$('#next'):e.key==='ArrowLeft'?$('#prev'):null;
+  if(b)location.hash=b.getAttribute('href');
+});
+$('#home-link').onclick=e=>{e.preventDefault();location.hash=''};
+route();
+</script>
+<script>
+/* GoatCounter: counts each chapter step as its own page (the guide uses #chapter-step links). */
+window.goatcounter = {path: function(){ return location.pathname + location.search + location.hash }};
+addEventListener('hashchange', function(){
+  if (window.goatcounter && window.goatcounter.count)
+    window.goatcounter.count({path: location.pathname + location.search + location.hash,
+                              title: (document.getElementById('crumb').textContent || document.title).trim()});
+});
+</script>
+<script data-goatcounter="https://howaiworks.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
